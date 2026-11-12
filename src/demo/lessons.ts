@@ -136,7 +136,7 @@ export function useMux(lesson: Lesson): boolean {
 function media(lesson: Lesson): { tag: string; poster: string } {
   if (useMux(lesson)) {
     return {
-      tag: `<mux-video playback-id="${lesson.mux}" playsinline preload="metadata" crossorigin="anonymous"></mux-video>`,
+      tag: `<mux-video src="https://stream.mux.com/${lesson.mux}.m3u8" playsinline preload="metadata" crossorigin="anonymous"></mux-video>`,
       poster: `https://image.mux.com/${lesson.mux}/thumbnail.webp?time=${lesson.posterTime}&amp;width=1600`,
     };
   }

@@ -32,7 +32,7 @@ Load the stylesheet and one script, then wrap your video:
 <video-player>
   <fork-skin scenario-src="/lessons/tu-ou-vous.json"
              poster="https://image.mux.com/PLAYBACK_ID/thumbnail.webp?time=78">
-    <mux-video playback-id="PLAYBACK_ID" playsinline preload="metadata" crossorigin="anonymous"></mux-video>
+    <mux-video src="https://stream.mux.com/PLAYBACK_ID.m3u8" playsinline preload="metadata" crossorigin="anonymous"></mux-video>
   </fork-skin>
 </video-player>
 ```
