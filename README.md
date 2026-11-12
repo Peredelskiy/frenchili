@@ -2,7 +2,7 @@
 
 **Fork** is a [Video.js v10](https://videojs.org) skin for lessons that branch on what the viewer answers. The video stops at a checkpoint. A right answer carries on; a wrong one takes a short detour, *a closer look*, and then rejoins the lesson. The timeline is a map of the route the viewer actually took.
 
-**Live demo:** [peredelskiy.github.io/frenchili](https://peredelskiy.github.io/frenchili/) — two French A1 lessons at Frenchili, a fictional language school, streaming from Mux.
+**Live demo:** [frenchili.collabas.com](https://frenchili.collabas.com) — two French A1 lessons at Frenchili, a fictional language school, streaming from Mux.
 
 ![Start screen of lesson 4, “Tu ou vous ?”](docs/screens/start.png)
 
