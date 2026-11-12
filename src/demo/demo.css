@@ -309,7 +309,8 @@ main {
   font-weight: 700;
 }
 
-/* Rules: a narrow number column, then one text size for the whole line. */
+/* Rules: a narrow number column, then one text size for the whole line. The number's cap
+   top lines up with the title's cap top (both trimmed to the cap height). */
 
 .rules {
   margin: 0;
@@ -321,14 +322,19 @@ main {
   display: grid;
   grid-template-columns: var(--num-col) 1fr;
   gap: var(--num-gap);
-  align-items: baseline;
-  padding: var(--row) 0;
+  align-items: start;
+  /* Trimmed text has no half-leading, so the row gets a little more air. */
+  padding: calc(var(--row) + var(--s2)) 0;
   border-bottom: var(--line) solid var(--ink);
+}
+.rules li > div {
+  text-box: trim-both cap alphabetic;
 }
 .rules-number {
   font-family: var(--font-display);
   font-size: 40px;
   line-height: 1;
+  text-box: trim-both cap alphabetic;
 }
 .rules strong {
   font-weight: 700;
