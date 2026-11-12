@@ -1,0 +1,2025 @@
+/* ==========================================================================
+   Fork — a branching skin for Video.js v10 · Affiche
+   --------------------------------------------------------------------------
+   Four colours, two typefaces, 4-px lines, no corners, no shadows. The bar
+   sits under the picture; the route line lives in the bar. Public API: the
+   --fork-* custom properties below; --media-* names from the packaged
+   Video.js skins are honoured as fallbacks.
+
+   Fonts are not loaded here. Load Anton and DM Sans on the page, e.g.
+   https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,wght@0,500;0,600;0,700;1,500&display=swap
+   ========================================================================== */
+
+/* ---- Video.js light-DOM base (same rules as @videojs/html global.css) ---- */
+
+@property --media-slider-fill {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+@property --media-slider-buffer {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+video-player,
+live-video-player,
+media-i18n,
+media-dialog,
+media-alert-dialog,
+media-error-dialog,
+media-controls,
+media-tooltip-group {
+  display: contents;
+}
+
+media-container video::-webkit-media-text-track-container {
+  z-index: 1;
+  font-family: inherit;
+}
+
+/* ---- Tokens -------------------------------------------------------------- */
+
+.fork-container {
+  --fork-cream: #f1eadb;
+  --fork-ink: #0b1730;
+  --fork-red: #c8202b;
+  --fork-mustard: #ebae2a;
+
+  --fork-accent: var(--fork-ink);
+  --fork-font-display: var(--media-font-family-display, 'Anton', Impact, 'Arial Narrow Bold', sans-serif);
+  --fork-font-text: var(--media-font-family, 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
+
+  /* Desktop scale (a player 720 px and wider). The mobile block below overrides. */
+  --fork-rule: 4px;
+  --fork-bar-height: 76px;
+  --fork-control: 48px;
+  --fork-icon: 24px;
+  --fork-kicker-size: 15px;
+  --fork-kicker-tracking: 0.1em;
+  --fork-time-size: 22px;
+  --fork-line-height: 12px;
+  --fork-station: 28px;
+  --fork-marker-w: 8px;
+  --fork-marker-h: 32px;
+  --fork-marker-ring: 3px;
+  --fork-terminus-w: 4px;
+  --fork-terminus-h: 28px;
+  --fork-dot: 2px;
+  --fork-dot-step: 12px;
+
+  --fork-dim-paused: rgb(11 23 48 / 0.5);
+  /* Any layer that carries cream text over the picture: ≥ 5.9:1 even over a white frame. */
+  --fork-dim-text: rgb(11 23 48 / 0.72);
+  --fork-dim-question: rgb(11 23 48 / 0.72);
+  /* Solid: the card must read the same over any frame (a mustard frame turned a translucent ink brown). */
+  --fork-dim-card: var(--fork-ink);
+  --fork-preview: rgb(11 23 48 / 0.35);
+  --fork-hover: rgb(11 23 48 / 0.1);
+  --fork-hover-light: rgb(11 23 48 / 0.06);
+
+  --fork-duration-fast: 120ms;
+  --fork-duration: 220ms;
+  --fork-duration-reflow: 420ms;
+  --fork-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---- Container and stage ------------------------------------------------- */
+
+.fork-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--fork-font-display);
+  color: var(--fork-ink);
+  background: var(--fork-ink);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The player itself: picture, question, bar, summary. It is the size container, so the
+   compact layout follows the picture's width — in fullscreen too, where the frame is
+   exactly as wide as the fitted picture (a phone sideways stays compact). */
+.fork-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  container-type: inline-size;
+  container-name: fork;
+}
+
+:where(.fork-container) * {
+  box-sizing: border-box;
+}
+
+:where(.fork-container) button {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fork-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--fork-ink);
+}
+
+.fork-stage video,
+.fork-stage mux-video,
+.fork-stage hls-video,
+.fork-stage hlsjs-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* never crop: lessons put type at the frame's edges */
+  background: var(--fork-ink);
+}
+
+.fork-poster {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fork-poster:not([data-visible]) {
+  display: none;
+}
+
+.fork-poster-image:not([src]) {
+  display: none;
+}
+
+.fork-poster-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fork-container[data-fork-phase='playing'] .fork-stage,
+.fork-container[data-fork-phase='detour'] .fork-stage,
+.fork-container[data-fork-phase='merge'] .fork-stage {
+  cursor: pointer;
+}
+
+.fork-announcer,
+.fork-visually-hidden,
+.fork-container media-status-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fork-container [hidden] {
+  display: none !important;
+}
+
+/* ---- Type ---------------------------------------------------------------- */
+
+.fork-kicker {
+  font-family: var(--fork-font-text);
+  font-size: var(--fork-kicker-size);
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: var(--fork-kicker-tracking);
+  text-transform: uppercase;
+}
+
+.fork-display {
+  margin: 0;
+  font-family: var(--fork-font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* ---- Focus: one style everywhere, ink on light, cream over the picture ---- */
+
+.fork-container :is(button, a, [role='slider'], [role='button'], [tabindex='0']):focus-visible {
+  outline: 3px solid var(--fork-ink);
+  outline-offset: 3px;
+}
+
+.fork-stage :is(button, [role='button'], [tabindex='0']):focus-visible,
+.fork-container:focus-visible {
+  outline-color: var(--fork-cream);
+}
+
+.fork-container :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- Bar ----------------------------------------------------------------- */
+
+.fork-bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: none;
+  gap: 16px;
+  align-items: center;
+  height: var(--fork-bar-height);
+  padding: 0 16px;
+  background: var(--fork-cream);
+  border-top: var(--fork-rule) solid var(--fork-ink);
+}
+
+.fork-control {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--fork-control);
+  height: var(--fork-control);
+  padding: 0;
+  margin: 0;
+  color: var(--fork-ink);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  transition: background-color var(--fork-duration-fast) var(--fork-ease);
+}
+
+.fork-control:hover {
+  background: var(--fork-hover);
+}
+
+.fork-control .fork-icon {
+  width: var(--fork-icon);
+  height: var(--fork-icon);
+}
+
+.fork-control[data-unsupported],
+.fork-control[data-unavailable] {
+  display: none;
+}
+
+/* Play is the one filled button in the bar. */
+.fork-bar-play {
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-bar-play:hover {
+  background: var(--fork-ink);
+}
+
+.fork-bar-play:not([data-paused]) .fork-icon-play,
+.fork-bar-play[data-paused] .fork-icon-pause {
+  display: none;
+}
+
+/* No playing through a checkpoint or a transition. */
+.fork-container[data-fork-phase='question'] .fork-bar-play,
+.fork-container[data-fork-phase='transition'] .fork-bar-play {
+  color: var(--fork-ink);
+  pointer-events: none;
+  background: var(--fork-cream);
+  box-shadow: inset 0 0 0 3px var(--fork-ink);
+}
+
+/* Active toggles: ink block, cream icon. */
+.fork-bar-mute[data-muted],
+.fork-bar-captions[data-active],
+fork-parts-button[aria-pressed='true'],
+.fork-bar-fullscreen[data-fullscreen] {
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-bar-mute:not([data-muted]) .fork-icon-volume-off,
+.fork-bar-mute[data-muted] .fork-icon-volume,
+.fork-bar-fullscreen:not([data-fullscreen]) .fork-icon-fullscreen-exit,
+.fork-bar-fullscreen[data-fullscreen] .fork-icon-fullscreen-enter {
+  display: none;
+}
+
+.fork-bar-time {
+  flex: none;
+  font-size: var(--fork-time-size);
+  line-height: 1.27;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.fork-time-total[data-changed] {
+  animation: fork-flip var(--fork-duration-reflow) var(--fork-ease);
+}
+
+@keyframes fork-flip {
+  0% {
+    opacity: 0.2;
+    translate: 0 -0.35em;
+  }
+}
+
+.fork-bar-actions {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  align-items: center;
+}
+
+.fork-bar-more {
+  display: none;
+}
+
+/* ---- Tooltips ------------------------------------------------------------ */
+
+.fork-tooltip {
+  --media-tooltip-side-offset: 10px;
+  --media-tooltip-boundary-offset: 8px;
+
+  position: absolute;
+  z-index: 9;
+  display: none;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  font-family: var(--fork-font-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--fork-cream);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--fork-ink);
+}
+
+.fork-tooltip[data-open] {
+  display: inline-flex;
+}
+
+.fork-tooltip-shortcut {
+  padding: 0 5px;
+  font-family: var(--fork-font-display);
+  letter-spacing: 0.04em;
+  color: var(--fork-ink);
+  background: var(--fork-cream);
+}
+
+.fork-tooltip-shortcut:empty {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .fork-tooltip {
+    display: none !important;
+  }
+}
+
+/* ---- Volume popover ------------------------------------------------------- */
+
+.fork-volume {
+  position: relative;
+  display: flex;
+  flex: none;
+}
+
+.fork-volume-popover {
+  position: absolute;
+  bottom: calc(100% + 24px);
+  left: 0;
+  z-index: 9;
+  width: var(--fork-control);
+  padding: 8px;
+  background: var(--fork-cream);
+  border: var(--fork-rule) solid var(--fork-ink);
+}
+
+.fork-volume-popover:not([data-open]) {
+  display: none;
+}
+
+.fork-volume-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fork-volume-step {
+  display: block;
+  width: 100%;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: 3px solid var(--fork-ink);
+}
+
+.fork-volume-step[data-on] {
+  background: var(--fork-ink);
+}
+
+.fork-volume-step:hover {
+  background: var(--fork-hover);
+}
+
+.fork-volume-step[data-on]:hover {
+  background: var(--fork-ink);
+}
+
+@media (pointer: coarse) {
+  .fork-volume-popover {
+    display: none !important;
+  }
+}
+
+/* ---- Route line ---------------------------------------------------------- */
+
+.fork-bar-line {
+  position: relative;
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--fork-control);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.fork-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* The dots are drawn once for the whole line, so their rhythm never breaks where
+   two unwatched segments meet (a confirmation followed by the next part, say).
+   Segments paint over them: solid when watched, the fill for the current one. */
+.fork-line::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: var(--fork-line-height);
+  content: '';
+  background: radial-gradient(circle, var(--fork-ink) var(--fork-dot), transparent calc(var(--fork-dot) + 0.5px)) 0 50% / var(--fork-dot-step) var(--fork-dot-step) repeat-x;
+  transform: translateY(-50%);
+}
+
+.fork-line-segment {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 16px;
+  height: var(--fork-line-height);
+  background: var(--fork-ink);
+  transition: flex-grow var(--fork-duration-reflow) var(--fork-ease);
+}
+
+/* Not watched yet: let the line's dots show through. */
+.fork-line-segment[data-locked],
+.fork-line-segment[data-current] {
+  background: transparent;
+}
+
+.fork-line-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  background: var(--fork-ink);
+}
+
+.fork-line-segment:not([data-current]) .fork-line-fill {
+  display: none;
+}
+
+/* Extra material: red while it plays, solid ink once watched. */
+.fork-line-segment[data-inserted][data-kind='detour'][data-current] .fork-line-fill {
+  background: var(--fork-red);
+}
+
+.fork-line-preview {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--fork-preview);
+}
+
+.fork-line-marker {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 2;
+  width: var(--fork-marker-w);
+  height: var(--fork-marker-h);
+  background: var(--fork-ink);
+  box-shadow: 0 0 0 var(--fork-marker-ring) var(--fork-cream);
+  transform: translate(-50%, -50%);
+  transition:
+    left var(--fork-duration-fast) linear,
+    width var(--fork-duration-fast) var(--fork-ease),
+    height var(--fork-duration-fast) var(--fork-ease);
+}
+
+.fork-line-marker[data-dragging] {
+  width: calc(var(--fork-marker-w) * 1.5);
+  height: calc(var(--fork-marker-h) * 1.25);
+  transition: none;
+}
+
+.fork-container[data-fork-phase='idle'] .fork-line-marker,
+.fork-container[data-fork-phase='question'] .fork-line-marker,
+.fork-container[data-fork-phase='transition'] .fork-line-marker,
+.fork-container[data-fork-phase='complete'] .fork-line-marker {
+  display: none; /* on a checkpoint the ringed circle says "you are here" */
+}
+
+.fork-line-station {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--fork-station);
+  height: var(--fork-station);
+  margin: 0 -4px;
+  color: var(--fork-cream);
+  background: var(--fork-cream);
+  border: var(--fork-rule) solid var(--fork-ink);
+  border-radius: 50%;
+}
+
+.fork-line-station[data-right] {
+  background: var(--fork-ink);
+  border-color: var(--fork-ink);
+}
+
+.fork-line-station[data-wrong] {
+  background: var(--fork-red);
+  border-color: var(--fork-red);
+}
+
+.fork-line-station[data-current],
+.fork-line-station[data-locked-hint] {
+  box-shadow:
+    0 0 0 var(--fork-rule) var(--fork-cream),
+    0 0 0 calc(var(--fork-rule) * 2) var(--fork-ink);
+}
+
+.fork-line-station-icon {
+  width: 50%;
+  height: 50%;
+}
+
+.fork-line-terminus {
+  flex: none;
+  width: var(--fork-terminus-w);
+  height: var(--fork-terminus-h);
+  background: var(--fork-ink);
+}
+
+/* Plaques over the line: "1:10 · At the café" while scrubbing, the lock on a refused seek. */
+.fork-line-plaque {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  font-family: var(--fork-font-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--fork-ink);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--fork-cream);
+  transform: translateX(-50%);
+}
+
+.fork-line-marker .fork-line-plaque {
+  bottom: calc(100% + 16px);
+  font-family: var(--fork-font-display);
+  font-size: var(--fork-time-size);
+  font-weight: 400;
+  line-height: 28px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.fork-line-plaque-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.fork-line-plaque-short {
+  display: none;
+}
+
+/* Expanded line on the summary screen: wider, with the parts named. */
+fork-route-map[data-size='expanded'] {
+  --fork-line-height: 24px;
+  --fork-station: 52px;
+  --fork-terminus-w: 6px;
+  --fork-terminus-h: 52px;
+
+  display: block;
+  height: 106px; /* labels above, nothing under the circles */
+  padding-top: 68px;
+}
+
+fork-route-map[data-size='expanded'] .fork-line {
+  align-items: center;
+  height: 24px;
+}
+
+fork-route-map[data-size='expanded'] .fork-line-station {
+  margin: 0 -6px;
+}
+
+/* On the summary map a confirmation is part of its checkpoint, not a part of its own. */
+fork-route-map[data-size='expanded'] .fork-line-segment[data-kind='confirm'] {
+  display: none;
+}
+
+fork-route-map[data-size='expanded'] .fork-line-marker {
+  display: none;
+}
+
+/* The extra material keeps its colour on the map. */
+fork-route-map[data-size='expanded'] .fork-line-segment[data-kind='detour'] {
+  background: var(--fork-red);
+}
+
+/* A part after a checkpoint is named from the circle's left edge (the circle overlaps it by 6 px). */
+fork-route-map[data-size='expanded'] .fork-line-segment[data-after-station] .fork-line-label {
+  left: calc(6px - var(--fork-station));
+  max-width: calc(100% - 18px + var(--fork-station));
+}
+
+.fork-line-label {
+  position: absolute;
+  bottom: calc(100% + 24px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fork-line-label-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fork-line-label-title {
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+fork-route-map[data-many] .fork-line-label-title {
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+
+.fork-line-label-duration {
+  font-size: 13px;
+}
+
+/* ---- Cards (question, transition, error) ---------------------------------- */
+
+.fork-card {
+  position: relative;
+  color: var(--fork-ink);
+  background: var(--fork-cream);
+  border: var(--fork-rule) solid var(--fork-ink);
+}
+
+.fork-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 43px 42px 40px;
+}
+
+.fork-card-title {
+  font-size: 80px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.fork-card-text {
+  margin: 0;
+  font-family: var(--fork-font-text);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.fork-card-block {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  height: 123px;
+  padding: 0 40px;
+  color: var(--fork-ink);
+  text-align: left;
+  background: var(--fork-mustard);
+  border: 0;
+  border-top: var(--fork-rule) solid var(--fork-ink);
+}
+
+.fork-card-block[data-tone='red'] {
+  color: var(--fork-cream);
+  background: var(--fork-red);
+}
+
+.fork-card-triangle {
+  flex: none;
+  width: 45px;
+  height: 55px;
+}
+
+.fork-card-block-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fork-card-block .fork-kicker {
+  font-size: 13px;
+}
+
+.fork-card-block-title {
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.fork-card-block-time {
+  flex: none;
+  font-size: var(--fork-time-size);
+  line-height: 28px;
+  letter-spacing: 0.04em;
+}
+
+button.fork-card-block:hover {
+  filter: brightness(0.94);
+}
+
+/* ---- Question ------------------------------------------------------------ */
+
+fork-question {
+  position: absolute;
+  inset: 0 0 var(--fork-bar-height);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto; /* a short screen (phone turned sideways) scrolls rather than clips */
+  overscroll-behavior: contain;
+  background: var(--fork-dim-question);
+}
+
+.fork-question-card {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: min(100%, 614px);
+  padding: 40px 37px 40px 35px;
+  color: var(--fork-ink);
+  background: var(--fork-cream);
+  border: var(--fork-rule) solid var(--fork-ink);
+}
+
+.fork-question-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.fork-question-kicker {
+  padding: 6px 12px;
+  font-size: 16px;
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-question-prompt {
+  margin: 0;
+  font-family: var(--fork-font-text);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fork-question-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.fork-question-row {
+  display: flex;
+  height: 72px;
+}
+
+.fork-question-row + .fork-question-row {
+  margin-top: calc(var(--fork-rule) * -1);
+}
+
+.fork-question-row:focus-within {
+  position: relative;
+  z-index: 1;
+}
+
+.fork-question-number {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 67px;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-question-option {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 16px;
+  font-family: var(--fork-font-text);
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--fork-ink);
+  text-align: left;
+  background: var(--fork-cream);
+  border: var(--fork-rule) solid var(--fork-ink);
+  transition: background-color var(--fork-duration-fast) var(--fork-ease);
+}
+
+.fork-question-option:hover:not([aria-disabled='true']) {
+  background: color-mix(in srgb, var(--fork-ink) 6%, var(--fork-cream));
+}
+
+.fork-question-option[aria-disabled='true'] {
+  cursor: default;
+}
+
+.fork-question-option[data-verdict='right'] {
+  background: var(--fork-mustard);
+}
+
+.fork-question-option[data-verdict='wrong'] {
+  color: var(--fork-cream);
+  background: var(--fork-red);
+}
+
+.fork-question-mark {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+
+/* The card takes focus for touch and mouse users: no ring on it. */
+.fork-question-card:focus {
+  outline: none;
+}
+
+/* The focus ring wraps the whole row (number + answer). */
+.fork-question-option:focus-visible {
+  outline: none;
+}
+
+.fork-question-row:has(.fork-question-option:focus-visible) {
+  outline: 3px solid var(--fork-ink);
+  outline-offset: 3px;
+}
+
+/* ---- Route card (transition) and toast (merge) ---------------------------- */
+
+fork-route-card {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+fork-route-card[data-mode='card'] {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--fork-dim-card);
+}
+
+.fork-route-card-card {
+  width: min(100%, 556px);
+  pointer-events: auto;
+  animation: fork-card-in var(--fork-duration) var(--fork-ease);
+}
+
+.fork-route-card-block {
+  cursor: pointer;
+}
+
+@keyframes fork-card-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+.fork-toast {
+  position: absolute;
+  top: 24px;
+  left: 48px;
+  display: flex;
+  align-items: stretch;
+  height: 64px;
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+  animation: fork-card-in var(--fork-duration) var(--fork-ease);
+}
+
+.fork-toast-number {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  font-size: 44px;
+  line-height: 1;
+  background: var(--fork-red);
+}
+
+.fork-toast-number:empty {
+  display: none;
+}
+
+.fork-toast-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 24px 0 20px;
+}
+
+.fork-toast .fork-kicker {
+  font-size: 13px;
+}
+
+.fork-toast-title {
+  font-size: 22px;
+  line-height: 26px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---- Closer-look badge --------------------------------------------------- */
+
+fork-detour-badge {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 4;
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  /* Ink rule around the badge: it must read on any frame, including the mustard ones. */
+  box-shadow: 0 0 0 3px var(--fork-ink);
+}
+
+.fork-badge-pill {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--fork-ink);
+  white-space: pre;
+  background: var(--fork-mustard);
+}
+
+.fork-badge-remaining-short {
+  display: none;
+}
+
+.fork-badge-button {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--fork-font-text);
+  font-size: var(--fork-kicker-size);
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--fork-cream);
+  letter-spacing: var(--fork-kicker-tracking);
+  text-transform: uppercase;
+  background: var(--fork-ink);
+  border: 0;
+}
+
+.fork-badge-button:focus-visible {
+  outline-color: var(--fork-cream);
+}
+
+.fork-badge-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-family: var(--fork-font-text);
+  font-size: var(--fork-kicker-size);
+  color: var(--fork-ink);
+  letter-spacing: 0;
+  background: var(--fork-cream);
+}
+
+/* ---- Paused and loading overlays ------------------------------------------ */
+
+.fork-paused {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  place-items: center;
+  background: var(--fork-dim-paused);
+}
+
+/* Shown when the picture is paused by the learner, not by a checkpoint. */
+.fork-container[data-fork-phase='playing']:has(.fork-bar-play[data-paused]) .fork-paused,
+.fork-container[data-fork-phase='detour']:has(.fork-bar-play[data-paused]) .fork-paused,
+.fork-container[data-fork-phase='merge']:has(.fork-bar-play[data-paused]) .fork-paused {
+  display: grid;
+}
+
+.fork-paused-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  color: var(--fork-ink);
+  background: var(--fork-cream);
+  border: 0;
+}
+
+.fork-paused-button .fork-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.fork-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  color: var(--fork-cream);
+  pointer-events: none;
+  background: var(--fork-dim-text);
+}
+
+.fork-loading[data-buffering] {
+  display: flex;
+}
+
+.fork-loading-squares {
+  display: flex;
+  gap: 8px;
+}
+
+.fork-loading-squares i {
+  width: 20px;
+  height: 20px;
+  background: var(--fork-cream);
+}
+
+.fork-loading-squares i:nth-child(2) {
+  background: var(--fork-mustard);
+  animation: fork-loading 900ms steps(3, end) infinite;
+}
+
+@keyframes fork-loading {
+  0% {
+    translate: -28px 0;
+  }
+
+  100% {
+    translate: 28px 0;
+  }
+}
+
+/* ---- Start screen -------------------------------------------------------- */
+
+fork-start {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 40px;
+  padding: 2.9%;
+  color: var(--fork-cream);
+  background: var(--fork-dim-text);
+}
+
+.fork-start-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fork-start-title {
+  font-size: clamp(64px, 12.5cqw, 150px);
+  line-height: 0.95;
+}
+
+.fork-start-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.fork-start-button {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  height: 72px;
+  padding: 0 32px 0 24px;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--fork-cream);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--fork-red);
+  border: 0;
+}
+
+.fork-start-button:focus-visible {
+  outline-color: var(--fork-cream);
+}
+
+.fork-start-play {
+  width: 28px;
+  height: 28px;
+}
+
+/* ---- Complete screen ----------------------------------------------------- */
+
+fork-complete {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  color: var(--fork-ink);
+  background: var(--fork-cream);
+}
+
+.fork-complete-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.fork-complete-head {
+  position: absolute;
+  top: 15.4%;
+  /* The title lives left of the score block and wraps there (Figma: "Course / complete", 448 px). */
+  right: calc(3.2% + 29.2% + 32px);
+  left: 2.9%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fork-complete-title {
+  font-size: clamp(56px, 10cqw, 120px);
+  line-height: 0.967; /* 116 / 120 */
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.fork-complete-block {
+  position: absolute;
+  top: 0;
+  right: 3.2%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 29.2%;
+  height: 44.7%;
+  padding: 80px 32px 24px;
+  color: var(--fork-cream);
+  background: var(--fork-red);
+}
+
+.fork-complete-score-label {
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.fork-complete-score {
+  font-size: clamp(96px, 18.3cqw, 220px);
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+}
+
+.fork-complete-actions {
+  position: absolute;
+  top: 44.7%;
+  right: 3.2%;
+  display: flex;
+  width: 29.2%;
+}
+
+.fork-action {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  height: 64px;
+  padding: 0 28px 0 20px;
+  font-family: var(--fork-font-display);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--fork-cream);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--fork-ink);
+  border: 0;
+}
+
+.fork-action[data-tone='mustard'] {
+  color: var(--fork-ink);
+  background: var(--fork-mustard);
+}
+
+.fork-action .fork-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.fork-complete-replay {
+  flex: 3;
+}
+
+.fork-complete-next {
+  flex: 4;
+}
+
+.fork-complete-line {
+  position: absolute;
+  right: 2.9%;
+  bottom: 5.6%;
+  left: 2.9%;
+}
+
+/* ---- Lesson parts -------------------------------------------------------- */
+
+fork-parts {
+  --fork-parts-mode: panel;
+
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 4;
+  width: 272px;
+}
+
+.fork-parts-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.fork-parts-row {
+  display: flex;
+  flex: 1 1 0;
+  gap: 16px;
+  align-items: center;
+  min-height: 0;
+  padding: 0 20px;
+  color: var(--fork-ink);
+  text-align: left;
+  background: var(--fork-cream);
+  border: 0;
+}
+
+.fork-parts-row[data-status='watched'] {
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-parts-row[data-status='current'] {
+  color: var(--fork-ink);
+  background: var(--fork-mustard);
+}
+
+.fork-parts-row[data-kind='detour'] {
+  color: var(--fork-cream);
+  background: var(--fork-red);
+}
+
+.fork-parts-row:disabled {
+  cursor: default;
+}
+
+.fork-parts-row:not(:disabled):hover {
+  filter: brightness(0.94);
+}
+
+.fork-parts-number {
+  flex: none;
+  width: 44px;
+  font-size: 80px;
+  line-height: 1;
+}
+
+.fork-parts-title {
+  flex: 1;
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.fork-parts-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+/* ---- Menu (narrow players) ----------------------------------------------- */
+
+.fork-menu {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 4px);
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  width: 176px;
+  background: var(--fork-cream);
+  border: 3px solid var(--fork-ink);
+}
+
+.fork-menu-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 44px;
+  padding: 0 14px 0 10px;
+  font-family: var(--fork-font-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--fork-ink);
+  text-align: left;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--fork-cream);
+  border: 0;
+}
+
+.fork-menu-item + .fork-menu-item {
+  border-top: 3px solid var(--fork-ink);
+}
+
+.fork-menu-item:hover {
+  background: color-mix(in srgb, var(--fork-ink) 6%, var(--fork-cream));
+}
+
+.fork-menu-item[aria-checked='true'] {
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+.fork-menu-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---- Error --------------------------------------------------------------- */
+
+.fork-error-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--fork-dim-card);
+}
+
+.fork-error-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 8;
+  width: min(100% - 48px, 556px);
+  transform: translate(-50%, -50%);
+}
+
+.fork-error-backdrop:not([data-open]),
+.fork-error-card:not([data-open]) {
+  display: none;
+}
+
+.fork-error-retry {
+  cursor: pointer;
+}
+
+/* ---- Captions ------------------------------------------------------------ */
+
+.fork-stage video::cue {
+  font-family: var(--fork-font-text);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+  color: var(--fork-cream);
+  background: var(--fork-ink);
+}
+
+/* ---- Fullscreen: the picture stays whole ----------------------------------
+   Lessons put type on the picture, so fullscreen never crops: the stage keeps
+   16:9 and sits centred above the bar, ink fills whatever the screen has left
+   (16:10 laptops, ultrawide monitors, phones turned sideways). Overlays live in
+   the stage, so they still line up with the picture. */
+
+.fork-container:fullscreen {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+/* iPhone: no element fullscreen, so the player fills the viewport inside the page
+   (see pseudo-fullscreen.ts). Same layout as real fullscreen, clear of the notch. */
+.fork-container[data-fork-pseudo-fullscreen] {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+
+html[data-fork-pseudo-fullscreen],
+html[data-fork-pseudo-fullscreen] body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+:is(.fork-container:fullscreen, .fork-container[data-fork-pseudo-fullscreen]) {
+  align-items: center;
+}
+
+/* The frame is as wide as the picture can be (measured in pseudo-fullscreen.ts; the
+   calc is the fallback before the script runs). Picture, bar and summary follow it. */
+:is(.fork-container:fullscreen, .fork-container[data-fork-pseudo-fullscreen]) .fork-frame {
+  flex: none;
+  width: var(--fork-fs-stage-width, min(100%, calc((100dvh - var(--fork-bar-height)) * 16 / 9)));
+  max-height: 100%;
+}
+
+/* ---- Narrow players (under 720 px): one-row bar, sheets, menu --------------- */
+
+@container fork (max-width: 719px) {
+  /* A container query can't style its own container, so the narrow tokens go on
+     everything inside it (custom properties inherit from there). */
+  .fork-frame > * {
+    --fork-rule: 3px;
+    --fork-bar-height: 48px;
+    --fork-control: 44px;
+    --fork-icon: 20px;
+    --fork-kicker-size: 12px;
+    --fork-kicker-tracking: 0.08em;
+    --fork-time-size: 14px;
+    --fork-line-height: 4px;
+    --fork-station: 14px;
+    --fork-marker-w: 3px;
+    --fork-marker-h: 16px;
+    --fork-marker-ring: 2px;
+    --fork-terminus-w: 3px;
+    --fork-terminus-h: 16px;
+    --fork-dot: 1px;
+    --fork-dot-step: 6px;
+  }
+
+  .fork-bar {
+    gap: 0;
+    padding: 0;
+  }
+
+  .fork-bar-play {
+    color: var(--fork-ink);
+    background: transparent;
+  }
+
+  .fork-bar-play:hover {
+    background: transparent;
+  }
+
+  .fork-container[data-fork-phase='question'] .fork-bar-play,
+  .fork-container[data-fork-phase='transition'] .fork-bar-play {
+    box-shadow: none;
+    opacity: 0.45;
+  }
+
+  .fork-bar-time {
+    margin-right: 10px;
+  }
+
+  .fork-bar-actions {
+    display: none;
+  }
+
+  .fork-bar-more {
+    position: static;
+    display: flex;
+    flex: none;
+  }
+
+  .fork-line-segment {
+    min-width: 6px;
+    transition: none;
+  }
+
+  .fork-line-station {
+    margin: 0 -2px;
+    border-width: 3px;
+  }
+
+  .fork-line-station[data-current],
+  .fork-line-station[data-locked-hint] {
+    box-shadow:
+      0 0 0 2px var(--fork-cream),
+      0 0 0 5px var(--fork-ink);
+  }
+
+  .fork-line-marker[data-dragging] {
+    width: 5px;
+    height: 22px;
+  }
+
+  .fork-line-plaque,
+  .fork-line-marker .fork-line-plaque {
+    gap: 6px;
+    padding: 4px 8px;
+    font-family: var(--fork-font-text);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .fork-line-marker .fork-line-plaque {
+    bottom: calc(100% + 12px);
+  }
+
+  .fork-line-plaque-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .fork-line-plaque-long {
+    display: none;
+  }
+
+  .fork-line-plaque-short {
+    display: inline;
+  }
+
+  /* The question card sits between the picture and the bar; the player grows. */
+  fork-question {
+    position: static;
+    display: block;
+    padding: 14px 16px;
+    background: var(--fork-cream);
+    border-top: var(--fork-rule) solid var(--fork-ink);
+  }
+
+  /* Fullscreen has a fixed height: the question lies over the picture and scrolls if it must. */
+  :is(.fork-container:fullscreen, .fork-container[data-fork-pseudo-fullscreen]) fork-question {
+    position: absolute;
+    inset: 0 0 var(--fork-bar-height);
+    display: grid;
+    align-content: center;
+    overflow-y: auto;
+  }
+
+  .fork-question-card {
+    gap: 14px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+  }
+
+  .fork-question-kicker {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+
+  .fork-question-prompt {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .fork-question-row {
+    height: 56px;
+  }
+
+  .fork-question-number {
+    width: 48px;
+    font-size: 26px;
+  }
+
+  .fork-question-option {
+    padding: 0 12px;
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .fork-question-mark {
+    width: 22px;
+    height: 22px;
+  }
+
+  fork-route-card[data-mode='card'] {
+    padding: 26px 13px;
+  }
+
+  .fork-card-body {
+    gap: 2px;
+    padding: 19px 14px 16px;
+  }
+
+  .fork-card-title {
+    font-size: 40px;
+  }
+
+  .fork-card-text {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .fork-card-block {
+    gap: 16px;
+    height: 57px;
+    padding: 0 16px;
+  }
+
+  .fork-card-triangle {
+    width: 20px;
+    height: 24px;
+  }
+
+  .fork-card-block-text {
+    gap: 0;
+  }
+
+  .fork-card-block .fork-kicker {
+    font-size: 12px;
+  }
+
+  .fork-card-block-title {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .fork-card-block-time {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .fork-toast {
+    top: 12px;
+    left: 12px;
+    height: 52px;
+  }
+
+  .fork-toast-number {
+    width: 52px;
+    font-size: 26px;
+  }
+
+  .fork-toast-text {
+    gap: 3px;
+    padding: 0 16px 0 12px;
+  }
+
+  .fork-toast .fork-kicker {
+    font-size: 12px;
+  }
+
+  .fork-toast-title {
+    font-size: 18px;
+    line-height: 20px;
+  }
+
+  /* Low enough to sit in the top band lesson frames keep free (≈ 20 % of the picture). */
+  fork-detour-badge {
+    top: 6px;
+    left: 6px;
+    height: 26px;
+    box-shadow: 0 0 0 2px var(--fork-ink);
+  }
+
+  .fork-badge-pill {
+    font-size: 11px;
+  }
+
+  .fork-badge-pill,
+  .fork-badge-button {
+    padding: 0 10px;
+  }
+
+  .fork-badge-remaining-long,
+  .fork-badge-key {
+    display: none;
+  }
+
+  .fork-badge-remaining-short {
+    display: inline;
+  }
+
+  .fork-badge-button {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+  }
+
+  .fork-paused-button {
+    width: 64px;
+    height: 64px;
+  }
+
+  .fork-paused-button .fork-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .fork-loading {
+    gap: 10px;
+  }
+
+  .fork-loading-squares {
+    gap: 6px;
+  }
+
+  .fork-loading-squares i {
+    width: 12px;
+    height: 12px;
+  }
+
+  .fork-loading-squares i:nth-child(2) {
+    animation-name: fork-loading-small;
+  }
+
+  fork-start {
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 16px;
+    text-align: center;
+    background: rgb(11 23 48 / 0.6);
+  }
+
+  .fork-start-head {
+    gap: 8px;
+    align-items: center;
+  }
+
+  .fork-start-title {
+    font-size: 40px;
+    line-height: 38px;
+  }
+
+  .fork-start-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fork-start-button {
+    gap: 8px;
+    height: 48px;
+    padding: 0 20px 0 16px;
+    font-size: 18px;
+  }
+
+  .fork-start-play {
+    width: 20px;
+    height: 20px;
+  }
+
+  .fork-complete-head {
+    top: 11.5%;
+    right: calc(38.6% + 12px);
+    left: 3.3%;
+    gap: 8px;
+  }
+
+  .fork-complete-title {
+    font-size: 40px;
+    line-height: 38px;
+  }
+
+  .fork-complete-block {
+    right: 0;
+    gap: 4px;
+    width: 38.6%;
+    height: 100%;
+    padding: 29px 16px 16px;
+    justify-content: flex-start;
+  }
+
+  .fork-complete-score-label {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .fork-complete-score {
+    font-size: 88px;
+    line-height: 78px;
+  }
+
+  .fork-complete-actions {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    width: 61.4%;
+  }
+
+  .fork-action {
+    gap: 6px;
+    height: 44px;
+    padding: 0;
+    font-size: 14px;
+    justify-content: center;
+  }
+
+  .fork-action .fork-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .fork-complete-line,
+  fork-route-map.fork-complete-line[data-size='expanded'] {
+    display: none;
+  }
+
+  fork-parts {
+    --fork-parts-mode: sheet;
+
+    inset: 0;
+    width: auto;
+    background: var(--fork-dim-paused);
+  }
+
+  .fork-parts-list {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    border-top: 3px solid var(--fork-ink);
+  }
+
+  .fork-parts-row,
+  .fork-parts-row[data-status='watched'],
+  .fork-parts-row[data-kind='detour'] {
+    flex: none;
+    gap: 12px;
+    height: 44px;
+    padding: 0 14px 0 12px;
+    color: var(--fork-ink);
+    background: var(--fork-cream);
+  }
+
+  .fork-parts-row[data-status='current'] {
+    background: var(--fork-mustard);
+  }
+
+  .fork-parts-row + .fork-parts-row {
+    border-top: 3px solid var(--fork-ink);
+  }
+
+  .fork-parts-number {
+    width: 28px;
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: 0.02em;
+  }
+
+  .fork-parts-title {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .fork-parts-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .fork-stage video::cue {
+    font-size: 14px;
+    line-height: 18px;
+  }
+}
+
+@keyframes fork-loading-small {
+  0% {
+    translate: -18px 0;
+  }
+
+  100% {
+    translate: 18px 0;
+  }
+}
+
+/* ---- Reduced motion ------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .fork-container {
+    --fork-duration-fast: 0.01ms;
+    --fork-duration: 0.01ms;
+    --fork-duration-reflow: 0.01ms;
+  }
+
+  .fork-container .fork-loading-squares i {
+    animation: none;
+  }
+}
+
+.fork-container[data-fork-reduced-motion] {
+  --fork-duration-fast: 0.01ms;
+  --fork-duration: 0.01ms;
+  --fork-duration-reflow: 0.01ms;
+}
+
+.fork-container[data-fork-reduced-motion] .fork-loading-squares i {
+  animation: none;
+}
+
+/* ---- Forced colours ------------------------------------------------------ */
+
+@media (forced-colors: active) {
+  .fork-line-segment,
+  .fork-line-fill,
+  .fork-line-terminus,
+  .fork-line-marker {
+    background: CanvasText;
+  }
+
+  .fork-line-station {
+    border-color: CanvasText;
+  }
+
+  .fork-question-option[data-verdict],
+  .fork-card-block {
+    border: 3px solid Highlight;
+  }
+}

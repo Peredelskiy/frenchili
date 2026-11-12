@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Leçon 4 · Tu ou vous&nbsp;? — Frenchili</title>
+    <meta name="description" content="French A1 lessons that branch on what you answer. Built with Fork, a skin for Video.js v10." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Frenchili — French lessons that branch on your answers" />
+    <meta property="og:description" content="Fork, a branching skin for Video.js v10: a checkpoint mid-video, a closer look when you get it wrong, and a timeline that maps your route." />
+    <meta property="og:image" content="https://image.mux.com/y7kXZk68mEeFGVBOWiYUhmuQFDnIQMY6JQr9wYfqEGk/thumbnail.jpg?time=78.4&amp;width=1200&amp;height=630&amp;fit_mode=smartcrop" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M15.2%2010.4c3.4-1.9%209.3-1.2%209.3%204.4%200%207.1-7.4%2013.3-18.1%2014.6%205-3.6%207.6-8.4%207.6-14.2%200-2.4.3-3.9%201.2-4.8z%22%20fill%3D%22%23C8202B%22/%3E%3Cpath%20d%3D%22M14.4%2011.6c.6-2.2%202.6-3.4%205.2-3.2M19.6%208.4c0-2.2.8-4%202.6-5.2%22%20fill%3D%22none%22%20stroke%3D%22%230B1730%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22square%22/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/fork/fork.css" />
+    <link rel="stylesheet" href="/src/demo/demo.css" />
+  </head>
+  <body>
+    <a class="skip" href="#lesson">Skip to the lesson</a>
+
+    <aside class="demo-tools" aria-label="Demo settings">
+      <div class="wrap demo-tools-inner">
+        <span class="demo-tools-label">Fork demo · Frenchili is a fictional school</span>
+        <span class="demo-tools-group" role="group" aria-label="Player width">
+          <button type="button" data-width="360">360</button>
+          <button type="button" data-width="720">720</button>
+          <button type="button" data-width="1200" aria-pressed="true">Full</button>
+        </span>
+        <label><input type="checkbox" id="reduced-motion" /> Reduced motion</label>
+        <button type="button" id="reset">Reset</button>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="wordmark" href="./" aria-label="Frenchili, home"><svg class="wordmark-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M15.2 10.4c3.4-1.9 9.3-1.2 9.3 4.4 0 7.1-7.4 13.3-18.1 14.6 5-3.6 7.6-8.4 7.6-14.2 0-2.4.3-3.9 1.2-4.8z" fill="#C8202B"/><path d="M14.4 11.6c.6-2.2 2.6-3.4 5.2-3.2M19.6 8.4c0-2.2.8-4 2.6-5.2" fill="none" stroke="#0B1730" stroke-width="2.6" stroke-linecap="square"/></svg><span>FRENCHILI</span></a>
+        <nav class="topnav" aria-label="Course">
+          <span class="topnav-course">French A1 · Unit 2</span>
+          <span class="topnav-progress" id="progress" aria-label="Lesson 4 of 12">
+            <span class="topnav-progress-bar" aria-hidden="true"><i id="progress-fill" style="width: 33%"></i></span>
+            <span class="topnav-progress-label" id="progress-label">4 / 12</span>
+          </span>
+        </nav>
+        <span class="avatar" role="img" aria-label="Your account"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3.5 21.5c0-4.7 3.8-7.5 8.5-7.5s8.5 2.8 8.5 7.5z"/></svg></span>
+      </div>
+    </header>
+
+    <main id="lesson" class="wrap"></main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <p><strong>Frenchili</strong> is a fictional school. This page demonstrates <strong>Fork</strong>, a branching skin for Video.js v10: one video file, a route that depends on your answers, and a timeline that shows it. Apache-2.0.</p>
+      </div>
+    </footer>
+
+    <ol id="log" hidden></ol>
+
+    <script type="module" src="/src/demo/main.ts"></script>
+  </body>
+</html>

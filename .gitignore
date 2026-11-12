@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-site
+scripts/shots
+.DS_Store
+
+# Lesson footage streams from Mux on the live site; the MP4s stay out of the repo.
+public/media/

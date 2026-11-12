@@ -1,0 +1,47 @@
+{
+  "name": "@collabas/fork-skin",
+  "version": "0.1.0",
+  "description": "Fork: a branching skin for Video.js v10. A checkpoint mid-video, a closer look on a wrong answer, a timeline that maps the route.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:e2e": "node scripts/e2e.mjs",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "audit": "node scripts/audit.mjs",
+    "build:claude": "VITE_MEDIA=file vite build --base=./",
+    "build:site": "vite build --base=./ --outDir dist-site && rm -rf dist-site/media"
+  },
+  "keywords": [
+    "video.js",
+    "videojs",
+    "skin",
+    "branching video",
+    "interactive video",
+    "e-learning",
+    "mux",
+    "web components"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@videojs/html": "^10.3.0",
+    "@videojs/mux-video": "^10.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6"
+  },
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Peredelskiy/frenchili.git"
+  },
+  "homepage": "https://peredelskiy.github.io/frenchili/"
+}

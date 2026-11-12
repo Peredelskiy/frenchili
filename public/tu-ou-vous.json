@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "kicker": "Leçon 4 · French A1",
+  "title": "Tu ou vous ?",
+  "name": "Leçon 4 · Tu ou vous ?",
+  "start": "p1",
+  "nextLesson": {
+    "title": "Leçon 5 · Bonjour ou salut ?",
+    "href": "./?lesson=5"
+  },
+  "labels": {
+    "closerLook": "Let’s take a closer look",
+    "closerLookBadge": "A closer look",
+    "closerLookRemaining": "back to the lesson in {time}",
+    "skipCloserLook": "Got it, continue",
+    "resumed": "Back to the lesson",
+    "nextLesson": "Next lesson",
+    "complete": "Lesson complete",
+    "mapLabel": "Lesson route",
+    "elapsed": "{time} on the lesson"
+  },
+  "nodes": {
+    "p1": {
+      "type": "segment",
+      "kind": "main",
+      "title": "Two words for you",
+      "in": 0,
+      "out": 40,
+      "next": "q1"
+    },
+    "q1": {
+      "type": "question",
+      "title": "Checkpoint 1 of 2",
+      "prompt": "On the platform, you ask a stranger for the time. What do you say?",
+      "options": [
+        {
+          "id": "a",
+          "label": "« Excusez-moi, vous avez l’heure ? »",
+          "correct": true,
+          "next": "p1a",
+          "feedback": "A stranger, so vous — and avez goes with it."
+        },
+        {
+          "id": "b",
+          "label": "« Salut, tu as l’heure ? »",
+          "next": "p1b",
+          "feedback": "Fine with a friend. Too familiar for a stranger."
+        },
+        {
+          "id": "c",
+          "label": "« Excusez-moi, tu avez l’heure ? »",
+          "next": "p1b",
+          "feedback": "Polite start, but tu never goes with avez."
+        }
+      ]
+    },
+    "p1a": {
+      "type": "segment",
+      "kind": "confirm",
+      "title": "Exactly",
+      "in": 40,
+      "out": 48,
+      "next": "p2"
+    },
+    "p1b": {
+      "type": "segment",
+      "kind": "detour",
+      "title": "Stranger or friend?",
+      "in": 48,
+      "out": 78,
+      "next": "p2",
+      "returnsTo": "p2"
+    },
+    "p2": {
+      "type": "segment",
+      "kind": "main",
+      "title": "At the café",
+      "in": 78,
+      "out": 113,
+      "next": "q2"
+    },
+    "q2": {
+      "type": "question",
+      "title": "Checkpoint 2 of 2",
+      "prompt": "Camille and Léo are both close friends. Ask them both if they want a coffee.",
+      "options": [
+        {
+          "id": "a",
+          "label": "« Vous voulez un café ? »",
+          "correct": true,
+          "next": "p2a",
+          "feedback": "Two people, so vous — even with close friends."
+        },
+        {
+          "id": "b",
+          "label": "« Tu veux un café ? »",
+          "next": "p2b",
+          "feedback": "That asks only one of them."
+        },
+        {
+          "id": "c",
+          "label": "« Ils veulent un café ? »",
+          "next": "p2b",
+          "feedback": "That talks about them, not to them."
+        }
+      ]
+    },
+    "p2a": {
+      "type": "segment",
+      "kind": "confirm",
+      "title": "Oui !",
+      "in": 113,
+      "out": 121,
+      "next": "p3"
+    },
+    "p2b": {
+      "type": "segment",
+      "kind": "detour",
+      "title": "One or many?",
+      "in": 121,
+      "out": 151,
+      "next": "p3",
+      "returnsTo": "p3"
+    },
+    "p3": {
+      "type": "segment",
+      "kind": "main",
+      "title": "To remember",
+      "in": 151,
+      "out": 176,
+      "next": "complete"
+    }
+  }
+}

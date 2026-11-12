@@ -1,0 +1,646 @@
+/*
+  Frenchili — a fictional language school. This is the page the Fork skin
+  lives on in the demo: enough product around the player to feel real,
+  nothing that competes with it. Same Affiche system as the skin.
+
+  Spacing: one scale, nothing off it.
+    --s1 4 · --s2 8 · --s3 12 · --s4 16 · --s5 24 · --s6 32 · --s7 48 · --s8 64
+  Three roles change with the screen, everything else is fixed:
+    --gutter   page edge          32 → 24 (≤ 900) → 16 (≤ 480)
+    --section  between sections   48 → 32 (≤ 900)
+    --row      inside list rows   16 → 12 (≤ 900)
+*/
+
+:root {
+  --cream: #f1eadb;
+  --ink: #0b1730;
+  --red: #c8202b;
+  --mustard: #ebae2a;
+  --ink-60: rgb(11 23 48 / 0.74); /* ≥ 4.5:1 on cream */
+  --font-display: 'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --font-text: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --gutter: var(--s6);
+  --section: var(--s7);
+  --row: var(--s4);
+
+  /* Numbered lists share one number column, so their text lines up. */
+  --num-col: 40px;
+  --num-gap: var(--s4);
+
+  --rule: 4px; /* page rules */
+  --line: 3px; /* rules inside lists and cards */
+  --wrap: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* The lesson container only takes focus to move the reading position (skip link): no ring. */
+main:focus {
+  outline: none;
+}
+
+.wrap {
+  /* viewport-fit=cover lets the player's fullscreen reach the screen edges on iPhone;
+     page content stays clear of the notch. */
+  width: min(100% - 2 * var(--gutter) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px), var(--wrap));
+  margin-inline: auto;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: var(--gutter);
+  z-index: 10;
+  padding: var(--s2) var(--s3);
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip:focus {
+  top: var(--s3);
+}
+
+.visually-hidden {
+  margin: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Demo strip (above the product, never over the player) ---------- */
+
+.demo-tools {
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 13px;
+  font-weight: 700;
+}
+.demo-tools-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s4);
+  min-height: 44px;
+  padding-block: var(--s1);
+}
+.demo-tools-label {
+  margin-right: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.demo-tools-group {
+  display: inline-flex;
+  gap: var(--s1);
+}
+.demo-tools button {
+  min-height: 32px;
+  padding: var(--s1) var(--s3);
+  border: 2px solid var(--cream);
+  background: transparent;
+  color: var(--cream);
+  font: inherit;
+  cursor: pointer;
+}
+.demo-tools button[aria-pressed='true'] {
+  background: var(--cream);
+  color: var(--ink);
+}
+.demo-tools button:hover {
+  border-color: var(--mustard);
+  background: var(--mustard);
+  color: var(--ink);
+}
+.demo-tools label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  cursor: pointer;
+}
+.demo-tools input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--mustard);
+}
+.demo-tools :focus-visible {
+  outline-color: var(--mustard);
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  border-bottom: var(--rule) solid var(--ink);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--s6);
+  height: 72px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding-top: 2px; /* Anton sits high */
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.wordmark-mark {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin-top: -4px; /* optical: the stem carries the weight upward */
+}
+
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  margin-left: auto;
+  font-weight: 600;
+}
+.topnav-course {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.topnav-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s3);
+  white-space: nowrap;
+}
+.topnav-progress-bar {
+  display: block;
+  width: 160px;
+  height: 12px;
+  border: var(--line) solid var(--ink);
+  background: var(--cream);
+}
+.topnav-progress-bar i {
+  display: block;
+  height: 100%;
+  background: var(--mustard);
+}
+.topnav-progress-label {
+  padding-top: 2px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--ink);
+  color: var(--cream);
+}
+.avatar svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ---------- Page ---------- */
+
+main {
+  flex: 1;
+  padding-block: var(--section) var(--s8);
+}
+
+/* ---------- Player ---------- */
+
+.player {
+  --demo-width: 100%;
+  width: min(100%, var(--demo-width));
+  margin-inline: auto;
+}
+.player video-player {
+  display: block;
+  /* Page and bar share the cream: an ink frame and a hard offset shadow keep the player one object. */
+  border: var(--rule) solid var(--ink);
+  box-shadow: 10px 10px 0 var(--ink);
+}
+
+.demo-note {
+  margin: 0 0 var(--s4);
+  padding: var(--s3) var(--s4);
+  border: var(--line) solid var(--ink);
+  background: var(--mustard);
+  font-weight: 700;
+}
+
+/* ---------- Two columns under the player ---------- */
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--section) var(--s7);
+  margin-top: var(--section);
+  padding-top: var(--section);
+  border-top: var(--rule) solid var(--ink);
+}
+
+.col > section + section,
+.rule-line + .section-title {
+  margin-top: var(--section);
+}
+
+.section-title {
+  margin: 0 0 var(--s4);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.fr {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* Rules: a narrow number column, then one text size for the whole line. */
+
+.rules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--line) solid var(--ink);
+}
+.rules li {
+  display: grid;
+  grid-template-columns: var(--num-col) 1fr;
+  gap: var(--num-gap);
+  align-items: baseline;
+  padding: var(--row) 0;
+  border-bottom: var(--line) solid var(--ink);
+}
+.rules-number {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+}
+.rules strong {
+  font-weight: 700;
+}
+.rules-note {
+  display: block;
+  margin-top: var(--s1);
+  color: var(--ink-60);
+  font-size: 15px;
+}
+
+.rule-line {
+  margin: var(--s5) 0 0;
+  padding: var(--s3) var(--s4);
+  border: var(--line) solid var(--ink);
+  background: var(--mustard);
+  font-weight: 600;
+}
+.rule-line .fr {
+  color: var(--ink); /* red on mustard is under 4.5:1 */
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Phrases */
+
+.phrases {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.phrases th,
+.phrases td {
+  padding: var(--row) var(--s3) var(--row) 0;
+  border-bottom: var(--line) solid var(--ink);
+  text-align: left;
+  vertical-align: top;
+}
+.phrases th {
+  padding-top: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.phrases td:nth-child(2) {
+  color: var(--ink-60);
+  white-space: nowrap;
+}
+
+/* Unit list */
+
+.unit {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--line) solid var(--ink);
+}
+.unit li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--num-gap);
+  padding: var(--s3) 0;
+  border-bottom: var(--line) solid var(--ink);
+  font-weight: 600;
+}
+.unit li > a {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: var(--num-gap);
+  text-decoration: none;
+}
+.unit li > span,
+.unit li > a > span {
+  flex: 0 0 var(--num-col);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+}
+.unit li > a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.unit .done,
+.unit .soon {
+  color: var(--ink-60);
+}
+.unit .current {
+  color: var(--red);
+}
+.unit .done::after,
+.unit .current::after,
+.unit .soon::after {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.unit .done::after {
+  content: '✓';
+  color: var(--ink);
+}
+.unit .current::after {
+  content: 'Now';
+}
+.unit .soon::after {
+  content: 'Soon';
+}
+
+/* Next card: the player's route-card block, on ink */
+
+.next-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  padding: var(--s5) var(--s6);
+  background: var(--ink);
+  color: var(--cream);
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+.next-card:hover,
+.next-card:focus-visible {
+  background: var(--red);
+}
+.next-card-triangle {
+  flex: none;
+  width: 45px;
+  height: 55px;
+}
+.next-card-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s2);
+  min-width: 0;
+}
+.next-card-kicker {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.next-card-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.next-card-soon {
+  border: var(--line) dashed var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  border-top: var(--rule) solid var(--ink);
+  background: var(--ink);
+  color: var(--cream);
+}
+.footer-inner {
+  padding-block: var(--s6) var(--s7);
+}
+.footer p {
+  max-width: 70ch;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ---------- Tablet and below ---------- */
+
+@media (max-width: 900px) {
+  :root {
+    --gutter: var(--s5);
+    --section: var(--s6);
+    --row: var(--s3);
+    --rule: 3px;
+  }
+  .topbar-inner {
+    gap: var(--s4);
+    height: 60px;
+  }
+  .wordmark {
+    font-size: 22px;
+  }
+  .wordmark-mark {
+    width: 28px;
+    height: 28px;
+  }
+  .topnav {
+    gap: var(--s4);
+  }
+  .topnav-course {
+    display: none;
+  }
+  .topnav-progress-bar {
+    width: 96px;
+  }
+  main {
+    padding-block: var(--s5) var(--s7);
+  }
+  .player video-player {
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .phrases td:nth-child(2) {
+    white-space: normal;
+  }
+  .footer-inner {
+    padding-block: var(--s5) var(--s6);
+  }
+}
+
+/* ---------- Phone ---------- */
+
+@media (max-width: 480px) {
+  :root {
+    --gutter: var(--s4);
+    --num-col: 28px;
+    --num-gap: var(--s3);
+  }
+  html {
+    font-size: 16px;
+  }
+  .topnav-progress-bar {
+    width: 56px;
+  }
+  .demo-tools-group {
+    display: none; /* width presets mean nothing on a phone */
+  }
+  .demo-tools-label {
+    flex-basis: 100%;
+  }
+  .section-title {
+    margin-bottom: var(--s3);
+    font-size: 26px;
+  }
+
+  .rules-number {
+    font-size: 28px;
+  }
+  .rules-note {
+    font-size: 14px;
+  }
+
+  /* Phrases stack: French on top, translation and who-to under it. */
+  .phrases {
+    font-size: 15px;
+  }
+  .phrases thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .phrases tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s1) var(--s3);
+    padding: var(--row) 0;
+    border-bottom: var(--line) solid var(--ink);
+  }
+  .phrases tr:first-child {
+    border-top: var(--line) solid var(--ink);
+  }
+  .phrases td {
+    padding: 0;
+    border: 0;
+  }
+  .phrases td.fr {
+    grid-column: 1 / -1;
+  }
+  .phrases td:nth-child(2) {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+  .phrases td:nth-child(3) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .next-card {
+    gap: var(--s4);
+    padding: var(--s4) var(--s5);
+  }
+  .next-card-triangle {
+    width: 33px;
+    height: 40px;
+  }
+  .next-card-title {
+    font-size: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next-card {
+    transition: none;
+  }
+}

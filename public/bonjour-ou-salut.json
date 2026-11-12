@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "kicker": "Leçon 5 · French A1",
+  "title": "Bonjour ou salut ?",
+  "name": "Leçon 5 · Bonjour ou salut ?",
+  "start": "p1",
+  "labels": {
+    "closerLook": "Let’s take a closer look",
+    "closerLookBadge": "A closer look",
+    "closerLookRemaining": "back to the lesson in {time}",
+    "skipCloserLook": "Got it, continue",
+    "resumed": "Back to the lesson",
+    "nextLesson": "Next lesson",
+    "complete": "Lesson complete",
+    "mapLabel": "Lesson route",
+    "elapsed": "{time} on the lesson"
+  },
+  "nodes": {
+    "p1": {
+      "type": "segment",
+      "kind": "main",
+      "title": "Two ways to say hello",
+      "in": 0,
+      "out": 38,
+      "next": "q1"
+    },
+    "q1": {
+      "type": "question",
+      "title": "Checkpoint",
+      "prompt": "You meet your new neighbour, Madame Morel, at her front door. Say hello and ask how she is.",
+      "options": [
+        {
+          "id": "a",
+          "label": "« Bonjour, comment allez-vous ? »",
+          "correct": true,
+          "next": "p1a",
+          "feedback": "A new neighbour, so vous — and bonjour fits everyone."
+        },
+        {
+          "id": "b",
+          "label": "« Salut, ça va ? »",
+          "next": "p1b",
+          "feedback": "Perfect with a friend. Too familiar for a new neighbour."
+        },
+        {
+          "id": "c",
+          "label": "« Bonjour, comment vas-tu ? »",
+          "next": "p1b",
+          "feedback": "Bonjour is right, but vas-tu is tu — too familiar here."
+        }
+      ]
+    },
+    "p1a": {
+      "type": "segment",
+      "kind": "confirm",
+      "title": "Exactly",
+      "in": 38,
+      "out": 46,
+      "next": "p2"
+    },
+    "p1b": {
+      "type": "segment",
+      "kind": "detour",
+      "title": "Bonjour fits everyone",
+      "in": 46,
+      "out": 71,
+      "next": "p2",
+      "returnsTo": "p2"
+    },
+    "p2": {
+      "type": "segment",
+      "kind": "main",
+      "title": "To remember",
+      "in": 71,
+      "out": 91,
+      "next": "complete"
+    }
+  }
+}
