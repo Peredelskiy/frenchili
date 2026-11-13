@@ -7086,8 +7086,8 @@ function Sc(e) {
 }
 var Cc = /* @__PURE__ */ new WeakMap(), wc = /* @__PURE__ */ new WeakMap();
 function Tc(e) {
-	let t = getComputedStyle(e), n = (e) => parseFloat(e) || 0, r = e.querySelector(".fork-bar"), i = e.clientWidth - n(t.paddingLeft) - n(t.paddingRight), a = e.clientHeight - n(t.paddingTop) - n(t.paddingBottom) - (r?.offsetHeight ?? 0), o = Math.max(0, Math.floor(Math.min(i, a * 16 / 9)));
-	e.style.setProperty("--fork-fs-stage-width", `${o}px`), e.style.setProperty("--fork-fs-stage-height", `${Math.round(o * 9 / 16)}px`);
+	let t = getComputedStyle(e), n = (e) => parseFloat(e) || 0, r = e.querySelector(".fork-bar"), i = e.clientWidth - n(t.paddingLeft) - n(t.paddingRight), a = r && getComputedStyle(r).position !== "absolute" ? r.offsetHeight : 0, o = e.clientHeight - n(t.paddingTop) - n(t.paddingBottom) - a, s = Math.max(0, Math.floor(Math.min(i, o * 16 / 9)));
+	e.style.setProperty("--fork-fs-stage-width", `${s}px`), e.style.setProperty("--fork-fs-stage-height", `${Math.round(s * 9 / 16)}px`);
 }
 function Ec(e) {
 	if (wc.has(e)) return;
@@ -7504,7 +7504,8 @@ var zc = class extends HTMLElement {
 			"reduced-motion",
 			"autostart",
 			"poster",
-			"auto-continue"
+			"auto-continue",
+			"theme"
 		];
 	}
 	#e = !1;
@@ -7517,7 +7518,7 @@ var zc = class extends HTMLElement {
 		for (let t of e) i.before(t);
 		i.remove();
 		let a = r.querySelector("fork-scenario");
-		t && a.append(t), this.#n(a), this.#t(r), this.replaceChildren(r);
+		t && a.append(t), this.#r(a), this.#n(r), this.replaceChildren(r), this.#t();
 		let o = this.querySelector(".fork-error-card");
 		if (o) {
 			let e = ++Ic, t = o.querySelector(".fork-error-title"), n = o.querySelector(".fork-error-text");
@@ -7568,15 +7569,21 @@ var zc = class extends HTMLElement {
 	}
 	attributeChangedCallback() {
 		let e = this.querySelector("fork-scenario");
-		e && this.#n(e), this.#e && this.#t(this);
+		e && this.#r(e), this.#e && (this.#n(this), this.#t());
 	}
-	#t(e) {
+	#t() {
+		let e = this.querySelector(".fork-container");
+		if (!e) return;
+		let t = this.getAttribute("theme");
+		t ? e.setAttribute("data-fork-theme", t) : e.removeAttribute("data-fork-theme");
+	}
+	#n(e) {
 		let t = e.querySelector(".fork-poster-image");
 		if (!t) return;
 		let n = this.getAttribute("poster");
 		n ? t.src = n : t.removeAttribute("src");
 	}
-	#n(e) {
+	#r(e) {
 		let t = this.getAttribute("scenario-src");
 		t ? e.setAttribute("src", t) : e.removeAttribute("src"), e.toggleAttribute("reduced-motion", this.hasAttribute("reduced-motion")), e.toggleAttribute("autostart", this.hasAttribute("autostart"));
 		let n = this.getAttribute("auto-continue");

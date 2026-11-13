@@ -21,7 +21,7 @@ const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome'
 const context = await browser.newContext({ viewport: { width: Math.max(width + 48, 480), height: 1100 } });
 const page = await context.newPage();
 page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
-await page.goto('http://127.0.0.1:5173/');
+await page.goto(`http://127.0.0.1:5173/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`);
 // Width presets are hidden on narrow screens; press the button from script.
 await page.evaluate((w) => document.querySelector(`[data-width="${w}"]`).click(), width);
 // The player sits under the lesson heading: bring it to the top of the viewport.

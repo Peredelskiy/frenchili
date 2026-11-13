@@ -41,10 +41,10 @@ const prepare = async () => {
 };
 
 // 1. Leçon 4 → Next lesson. (Leçon 4 cannot be scrubbed past its checkpoints, so read the link from its scenario.)
-await page.goto('http://127.0.0.1:5173/');
+await page.goto(`http://127.0.0.1:5173/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`);
 const nextHref = await page.evaluate(() => fetch('./tu-ou-vous.json').then((r) => r.json()).then((d) => d.nextLesson?.href));
 check('Leçon 4 scenario links to Leçon 5', nextHref === './?lesson=5', nextHref);
-await page.goto(new URL(nextHref, 'http://127.0.0.1:5173/').href);
+await page.goto((() => { const u = new URL(nextHref, 'http://127.0.0.1:5173/'); if (process.env.THEME) u.searchParams.set('theme', process.env.THEME); return u.href; })());
 await prepare();
 await waitPhase('idle');
 check('page title is Leçon 5', (await page.title()).startsWith('Leçon 5'), await page.title());

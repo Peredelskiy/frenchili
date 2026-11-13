@@ -111,7 +111,7 @@ export function forkSkinTemplate(): string {
 
 export class ForkSkinElement extends HTMLElement {
   static readonly tagName = 'fork-skin';
-  static readonly observedAttributes = ['scenario-src', 'reduced-motion', 'autostart', 'poster', 'auto-continue'];
+  static readonly observedAttributes = ['scenario-src', 'reduced-motion', 'autostart', 'poster', 'auto-continue', 'theme'];
 
   #built = false;
 
@@ -136,6 +136,7 @@ export class ForkSkinElement extends HTMLElement {
     this.#syncPoster(fragment);
 
     this.replaceChildren(fragment);
+    this.#syncTheme();
 
     // The error dialog speaks the card's own words ("No video. Check your connection…"),
     // never the media error string (e.g. "PipelineStatus::DEMUXER_ERROR…").
@@ -219,7 +220,19 @@ export class ForkSkinElement extends HTMLElement {
   attributeChangedCallback(): void {
     const engine = this.querySelector('fork-scenario');
     if (engine) this.#syncEngineAttributes(engine);
-    if (this.#built) this.#syncPoster(this);
+    if (this.#built) {
+      this.#syncPoster(this);
+      this.#syncTheme();
+    }
+  }
+
+  /** `theme="glass"` switches the look (see theme-glass.css); no attribute is the Affiche look. */
+  #syncTheme(): void {
+    const container = this.querySelector<HTMLElement>('.fork-container');
+    if (!container) return;
+    const theme = this.getAttribute('theme');
+    if (theme) container.setAttribute('data-fork-theme', theme);
+    else container.removeAttribute('data-fork-theme');
   }
 
   /** `poster` on <fork-skin> fills the skin's poster image (shown until the lesson starts). */

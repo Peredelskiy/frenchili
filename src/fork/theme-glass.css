@@ -1,0 +1,1283 @@
+/* ==========================================================================
+   Fork — Glass theme
+   A neutral look for any platform: the bar lies over the picture on a soft
+   shade, controls are round glass buttons, the route is a segmented track,
+   cards are frosted panels. One accent colour (red) carries progress and the
+   primary actions; amber marks the closer look.
+
+   Turn it on with <fork-skin theme="glass">. Everything here is scoped to
+   [data-fork-theme='glass'], so the Affiche look (fork.css) is untouched; the
+   behaviour, keyboard and accessibility rules are shared.
+   ========================================================================== */
+
+.fork-container[data-fork-theme='glass'] {
+  --fork-cream: #ffffff;
+  --fork-ink: #111116;
+  --fork-red: #d92d36; /* white text on it: 4.8:1 */
+  --fork-mustard: #f4b740;
+  --fork-accent: var(--fork-red);
+  --fork-font-display: var(--media-font-family, 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  --fork-font-text: var(--media-font-family, 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+
+  --fork-glass: rgb(28 28 34 / 0.5);
+  --fork-glass-strong: rgb(20 20 26 / 0.78);
+  --fork-glass-line: rgb(255 255 255 / 0.16);
+  --fork-glass-hover: rgb(255 255 255 / 0.2);
+  --fork-glass-blur: blur(18px) saturate(160%);
+  --fork-text-muted: rgb(255 255 255 / 0.74);
+  --fork-radius: 20px;
+
+  --fork-rule: 2px;
+  --fork-bar-height: 148px;
+  --fork-control: 48px;
+  --fork-icon: 22px;
+  --fork-kicker-size: 13px;
+  --fork-kicker-tracking: 0.08em;
+  --fork-time-size: 15px;
+  --fork-line-height: 6px;
+  --fork-station: 18px;
+  --fork-marker-w: 18px;
+  --fork-marker-h: 18px;
+
+  --fork-dim-paused: rgb(0 0 0 / 0.28);
+  --fork-dim-text: rgb(0 0 0 / 0.5);
+  --fork-dim-question: rgb(0 0 0 / 0.45);
+  --fork-dim-card: rgb(0 0 0 / 0.45);
+  --fork-preview: rgb(255 255 255 / 0.35);
+  --fork-hover: var(--fork-glass-hover);
+
+  color: #fff;
+  font-family: var(--fork-font-text);
+  background: #000;
+
+  & .fork-stage,
+  & .fork-stage :is(video, mux-video, hls-video, hlsjs-video) {
+    background: #000;
+  }
+
+  /* ---- Type ---- */
+
+  & .fork-display {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-transform: none;
+  }
+
+  & .fork-kicker {
+    font-weight: 600;
+  }
+
+  /* ---- Focus: a white ring, rounded with the control ---- */
+
+  & :is(button, a, [role='slider'], [role='button'], [tabindex='0']):focus-visible,
+  & .fork-stage :is(button, [role='button'], [tabindex='0']):focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  /* ---- Bar: over the bottom of the picture, two rows ---- */
+
+  & .fork-bar {
+    position: absolute;
+    top: calc(100cqw * 9 / 16 - var(--fork-bar-height)); /* the picture's bottom edge */
+    right: 0;
+    left: 0;
+    z-index: 6;
+    display: block;
+    padding: 0 24px 18px;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.55) 60%, transparent);
+    border-top: 0;
+    transition: opacity var(--fork-duration) var(--fork-ease);
+  }
+
+  & .fork-bar > media-tooltip-group {
+    display: grid;
+    grid-template-areas:
+      'line line line line line'
+      'play time . actions more';
+    grid-template-columns: auto auto 1fr auto auto;
+    row-gap: 10px;
+    column-gap: 14px;
+    align-content: end;
+    align-items: center;
+    height: 100%;
+  }
+
+  & .fork-bar-play { grid-area: play; }
+  & .fork-bar-time { grid-area: time; }
+  & .fork-bar-line { grid-area: line; height: 28px; }
+  & .fork-bar-actions { grid-area: actions; gap: 10px; }
+  & .fork-bar-more { grid-area: more; }
+
+  /* Hidden while the lesson plays and the viewer is idle; back on any movement, key or pause. */
+  & media-controls:not([data-visible]) .fork-bar:not(:focus-within) {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  & .fork-control {
+    color: #fff;
+    background: var(--fork-glass);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-control:hover {
+    background: var(--fork-glass-hover);
+  }
+
+  & .fork-bar-play,
+  & .fork-bar-play:hover {
+    width: 56px;
+    height: 56px;
+    color: #fff;
+    background: var(--fork-glass);
+  }
+
+  & .fork-bar-play:hover {
+    background: var(--fork-glass-hover);
+  }
+
+  & .fork-bar-play .fork-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  &[data-fork-phase='question'] .fork-bar-play,
+  &[data-fork-phase='transition'] .fork-bar-play {
+    color: #fff;
+    background: var(--fork-glass);
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+    opacity: 0.4;
+  }
+
+  /* Active toggles: the accent. */
+  & :is(.fork-bar-mute[data-muted], .fork-bar-captions[data-active], fork-parts-button[aria-pressed='true'], .fork-bar-fullscreen[data-fullscreen]) {
+    color: #fff;
+    background: var(--fork-red);
+    box-shadow: 0 0 0 4px rgb(217 45 54 / 0.28);
+  }
+
+  & .fork-bar-time {
+    font-family: var(--fork-font-text);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+  }
+
+  /* ---- Tooltips and volume ---- */
+
+  & .fork-tooltip {
+    padding: 6px 10px;
+    font-family: var(--fork-font-text);
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0;
+    text-transform: none;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 8px;
+  }
+
+  & .fork-tooltip-shortcut {
+    font-family: var(--fork-font-text);
+    font-weight: 600;
+    color: #fff;
+    background: rgb(255 255 255 / 0.16);
+    border-radius: 4px;
+  }
+
+  & .fork-volume-popover {
+    bottom: calc(100% + 12px);
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border: 0;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-volume-step {
+    height: 14px;
+    background: rgb(255 255 255 / 0.2);
+    border: 0;
+    border-radius: 4px;
+  }
+
+  & .fork-volume-step[data-on],
+  & .fork-volume-step[data-on]:hover {
+    background: #fff;
+  }
+
+  & .fork-volume-step:hover {
+    background: rgb(255 255 255 / 0.36);
+  }
+
+  /* ---- Route: a segmented track (one segment per part) ---- */
+
+  & .fork-line {
+    gap: 4px;
+  }
+
+  & .fork-line::before,
+  & .fork-line-terminus {
+    display: none;
+  }
+
+  & .fork-line-segment {
+    min-width: 8px;
+    background: var(--fork-red);
+    border-radius: 999px;
+  }
+
+  & .fork-line-segment[data-locked],
+  & .fork-line-segment[data-current] {
+    background: rgb(255 255 255 / 0.36);
+  }
+
+  & .fork-line-fill,
+  & .fork-line-preview {
+    border-radius: inherit;
+  }
+
+  & .fork-line-fill {
+    background: var(--fork-red);
+  }
+
+  & .fork-line-segment[data-inserted][data-kind='detour'][data-current] .fork-line-fill {
+    background: var(--fork-mustard);
+  }
+
+  & .fork-line-marker {
+    background: #fff;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 6px rgb(217 45 54 / 0.35),
+      0 2px 8px rgb(0 0 0 / 0.45);
+  }
+
+  & .fork-line-marker[data-dragging] {
+    width: 22px;
+    height: 22px;
+  }
+
+  & .fork-line-station {
+    margin: 0;
+    color: #fff;
+    background: rgb(20 20 26 / 0.9);
+    border: 2px solid #fff;
+  }
+
+  & .fork-line-station[data-right] {
+    color: var(--fork-ink);
+    background: #fff;
+    border-color: #fff;
+  }
+
+  & .fork-line-station[data-wrong] {
+    color: #fff;
+    background: var(--fork-red);
+    border-color: var(--fork-red);
+  }
+
+  & .fork-line-station[data-current],
+  & .fork-line-station[data-locked-hint] {
+    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.3);
+  }
+
+  & .fork-line-station-icon {
+    width: 62%;
+    height: 62%;
+  }
+
+  & .fork-line-plaque,
+  & .fork-line-marker .fork-line-plaque {
+    padding: 7px 12px;
+    font-family: var(--fork-font-text);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 16px;
+    color: #fff;
+    letter-spacing: 0;
+    text-transform: none;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 10px;
+  }
+
+  & .fork-line-marker .fork-line-plaque {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  /* The summary map. */
+  & fork-route-map[data-size='expanded'] {
+    --fork-line-height: 10px;
+    --fork-station: 28px;
+
+    height: 92px;
+    padding-top: 58px;
+  }
+
+  & fork-route-map[data-size='expanded'] .fork-line {
+    height: 28px;
+  }
+
+  & fork-route-map[data-size='expanded'] .fork-line-station {
+    margin: 0;
+  }
+
+  & fork-route-map[data-size='expanded'] .fork-line-segment[data-kind='detour'] {
+    background: var(--fork-mustard);
+  }
+
+  & fork-route-map[data-size='expanded'] .fork-line-segment[data-after-station] .fork-line-label {
+    left: 0;
+    max-width: calc(100% - 8px);
+  }
+
+  & .fork-line-label {
+    bottom: calc(100% + 14px);
+    font-family: var(--fork-font-text);
+  }
+
+  & .fork-line-label-title,
+  & fork-route-map[data-many] .fork-line-label-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  & .fork-line-label-duration {
+    color: var(--fork-text-muted);
+  }
+
+  /* ---- Cards: frosted panels ---- */
+
+  & .fork-card {
+    overflow: hidden;
+    color: #fff;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border: 0;
+    border-radius: var(--fork-radius);
+    box-shadow:
+      inset 0 0 0 1px var(--fork-glass-line),
+      0 24px 60px rgb(0 0 0 / 0.35);
+  }
+
+  & .fork-card-body {
+    gap: 8px;
+    padding: 30px 28px 22px;
+  }
+
+  & .fork-card-title {
+    font-family: var(--fork-font-text);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-transform: none;
+  }
+
+  & .fork-card-text {
+    font-size: 17px;
+    line-height: 24px;
+    color: var(--fork-text-muted);
+  }
+
+  & .fork-card-block {
+    width: calc(100% - 24px);
+    height: 68px;
+    margin: 0 12px 12px;
+    padding: 0 20px;
+    gap: 16px;
+    color: var(--fork-ink);
+    background: #fff;
+    border: 0;
+    border-radius: 14px;
+  }
+
+  & .fork-card-block[data-tone='red'] {
+    color: #fff;
+    background: var(--fork-red);
+  }
+
+  & .fork-card-triangle {
+    width: 16px;
+    height: 20px;
+  }
+
+  & .fork-card-block .fork-kicker {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+
+  & .fork-card-block-title {
+    font-family: var(--fork-font-text);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+
+  & .fork-card-block-time {
+    font-family: var(--fork-font-text);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  /* ---- Question ---- */
+
+  & fork-question {
+    background: var(--fork-dim-question);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  & .fork-question-card {
+    gap: 22px;
+    width: min(100%, 560px);
+    padding: 28px;
+    color: #fff;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border: 0;
+    border-radius: var(--fork-radius);
+    box-shadow:
+      inset 0 0 0 1px var(--fork-glass-line),
+      0 24px 60px rgb(0 0 0 / 0.35);
+  }
+
+  & .fork-question-kicker {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.14);
+    border-radius: 999px;
+  }
+
+  & .fork-question-prompt {
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+
+  & .fork-question-options {
+    gap: 8px;
+  }
+
+  & .fork-question-row {
+    height: 60px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.08);
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+    transition: background-color var(--fork-duration-fast) var(--fork-ease);
+  }
+
+  & .fork-question-row + .fork-question-row {
+    margin-top: 0;
+  }
+
+  & .fork-question-row:has(.fork-question-option:hover:not([aria-disabled='true'])) {
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  & .fork-question-row:has([data-verdict='right']) {
+    color: var(--fork-ink);
+    background: #fff;
+  }
+
+  & .fork-question-row:has([data-verdict='wrong']) {
+    color: #fff;
+    background: var(--fork-red);
+    box-shadow: none;
+  }
+
+  & .fork-question-number {
+    align-self: center;
+    width: 34px;
+    height: 34px;
+    margin-left: 13px;
+    font-family: var(--fork-font-text);
+    font-size: 15px;
+    font-weight: 700;
+    color: inherit;
+    background: rgb(255 255 255 / 0.14);
+    border-radius: 50%;
+  }
+
+  & .fork-question-row:has([data-verdict='right']) .fork-question-number {
+    background: rgb(0 0 0 / 0.08);
+  }
+
+  & .fork-question-option,
+  & .fork-question-option:hover:not([aria-disabled='true']),
+  & .fork-question-option[data-verdict] {
+    padding: 0 16px 0 12px;
+    font-size: 18px;
+    font-style: normal;
+    color: inherit;
+    background: transparent;
+    border: 0;
+  }
+
+  & .fork-question-mark {
+    width: 22px;
+    height: 22px;
+  }
+
+  & .fork-question-row:has(.fork-question-option:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  /* ---- Route card, toast, closer-look badge ---- */
+
+  /* The card sits above the bar, so the route map stays in view while the detour appears. */
+  & fork-route-card[data-mode='card'] {
+    inset: 0 0 var(--fork-bar-height);
+    background: var(--fork-dim-card);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  & .fork-route-card-card {
+    width: min(100%, 480px);
+  }
+
+  & .fork-toast {
+    top: 20px;
+    left: 20px;
+    height: 56px;
+    overflow: hidden;
+    color: #fff;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-toast-number {
+    width: 56px;
+    font-family: var(--fork-font-text);
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  & .fork-toast .fork-kicker {
+    font-size: 11px;
+    color: var(--fork-text-muted);
+  }
+
+  & .fork-toast-title {
+    font-family: var(--fork-font-text);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+
+  & fork-detour-badge {
+    top: 20px;
+    left: 20px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+  }
+
+  /* Glass with an amber dot: an amber pill vanished on amber frames. */
+  & .fork-badge-pill {
+    gap: 8px;
+    padding: 0 14px;
+    font-family: var(--fork-font-text);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.04em;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+  }
+
+  & .fork-badge-pill::before {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    content: '';
+    background: var(--fork-mustard);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgb(244 183 64 / 0.3);
+  }
+
+  & .fork-badge-button {
+    box-shadow: inset 1px 0 0 var(--fork-glass-line);
+  }
+
+  & .fork-badge-button {
+    gap: 10px;
+    padding: 0 14px;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: 0.04em;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+  }
+
+  & .fork-badge-key {
+    font-size: 12px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.18);
+    border-radius: 6px;
+  }
+
+  /* ---- Paused and loading ---- */
+
+  & .fork-paused-button {
+    width: 84px;
+    height: 84px;
+    color: #fff;
+    background: var(--fork-glass);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-paused-button .fork-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  & .fork-loading {
+    color: #fff;
+  }
+
+  & .fork-loading-squares i {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  & .fork-loading-squares i:nth-child(2) {
+    background: var(--fork-red);
+  }
+
+  /* ---- Start ---- */
+
+  & fork-start {
+    gap: 28px;
+    padding: 0 5.5% calc(var(--fork-bar-height) - 24px);
+    color: #fff;
+    /* Small white text must hold over a white frame too. */
+    background: linear-gradient(to right, rgb(0 0 0 / 0.25), transparent) rgb(0 0 0 / 0.7);
+  }
+
+  & .fork-start-kicker,
+  & .fork-start-meta {
+    color: var(--fork-text-muted);
+  }
+
+  & .fork-start-title {
+    font-size: clamp(40px, 7.4cqw, 92px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  & .fork-start-button {
+    gap: 10px;
+    height: 56px;
+    padding: 0 28px 0 22px;
+    font-family: var(--fork-font-text);
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0;
+    text-transform: none;
+    background: var(--fork-red);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgb(217 45 54 / 0.35);
+  }
+
+  & .fork-start-play {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ---- Complete: frosted over the last frame ---- */
+
+  & fork-complete {
+    color: #fff;
+    background: rgb(10 10 14 / 0.72);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    backdrop-filter: blur(28px) saturate(140%);
+  }
+
+  & .fork-complete-head {
+    top: 14%;
+    right: calc(5% + 30% + 32px);
+    left: 5%;
+  }
+
+  & .fork-complete-kicker {
+    color: var(--fork-text-muted);
+  }
+
+  & .fork-complete-title {
+    font-size: clamp(36px, 6.4cqw, 80px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  & .fork-complete-block {
+    top: 10%;
+    right: 5%;
+    justify-content: flex-end;
+    width: 30%;
+    height: 40%;
+    padding: 24px 28px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.08);
+    border-radius: var(--fork-radius);
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-complete-score-label {
+    font-family: var(--fork-font-text);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--fork-text-muted);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  & .fork-complete-score {
+    font-family: var(--fork-font-text);
+    font-size: clamp(56px, 10cqw, 128px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+
+  & .fork-complete-actions {
+    top: calc(50% + 12px);
+    right: 5%;
+    gap: 8px;
+    width: 30%;
+  }
+
+  & .fork-action {
+    justify-content: center;
+    gap: 8px;
+    height: 52px;
+    padding: 0 18px;
+    font-family: var(--fork-font-text);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0;
+    text-transform: none;
+    background: var(--fork-glass);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-action[data-tone='mustard'] {
+    color: #fff;
+    background: var(--fork-red);
+    box-shadow: none;
+  }
+
+  & .fork-action .fork-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  & .fork-complete-line {
+    right: 5%;
+    bottom: 8%;
+    left: 5%;
+  }
+
+  /* ---- Lesson parts and the narrow menu ---- */
+
+  & fork-parts {
+    inset: 16px 16px var(--fork-bar-height) auto;
+  }
+
+  & .fork-parts-list {
+    gap: 6px;
+    height: auto;
+    max-height: 100%;
+    padding: 8px;
+    overflow-y: auto;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-parts-row,
+  & .fork-parts-row[data-status='watched'],
+  & .fork-parts-row[data-kind='detour'] {
+    flex: none;
+    gap: 12px;
+    height: 52px;
+    padding: 0 14px;
+    color: #fff;
+    background: rgb(255 255 255 / 0.06);
+    border: 0;
+    border-radius: 12px;
+  }
+
+  & .fork-parts-row[data-status='watched'] {
+    background: rgb(255 255 255 / 0.12);
+  }
+
+  & .fork-parts-row[data-kind='detour'] {
+    color: var(--fork-ink);
+    background: var(--fork-mustard);
+  }
+
+  & .fork-parts-row[data-status='current'] {
+    color: var(--fork-ink);
+    background: #fff;
+  }
+
+  & .fork-parts-row + .fork-parts-row {
+    border-top: 0;
+  }
+
+  & .fork-parts-number {
+    width: 22px;
+    font-family: var(--fork-font-text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+
+  & .fork-parts-title {
+    font-family: var(--fork-font-text);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  & .fork-parts-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  & .fork-menu {
+    bottom: calc(100% + 8px);
+    overflow: hidden;
+    background: var(--fork-glass-strong);
+    -webkit-backdrop-filter: var(--fork-glass-blur);
+    backdrop-filter: var(--fork-glass-blur);
+    border: 0;
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px var(--fork-glass-line);
+  }
+
+  & .fork-menu-item {
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0;
+    text-transform: none;
+    background: transparent;
+  }
+
+  & .fork-menu-item + .fork-menu-item {
+    border-top: 1px solid var(--fork-glass-line);
+  }
+
+  & .fork-menu-item:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+
+  & .fork-menu-item[aria-checked='true'] {
+    color: #fff;
+    background: rgb(255 255 255 / 0.18);
+  }
+
+  /* ---- Captions ---- */
+
+  & .fork-stage video::cue {
+    font-family: var(--fork-font-text);
+    color: #fff;
+    background: rgb(0 0 0 / 0.72);
+  }
+}
+
+/* Glass that can't blur, or a viewer who asked for less transparency: solid panels. */
+@media (prefers-reduced-transparency: reduce) {
+  .fork-container[data-fork-theme='glass'] {
+    --fork-glass: rgb(36 36 44 / 0.94);
+    --fork-glass-strong: rgb(20 20 26 / 0.97);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .fork-container[data-fork-theme='glass'] {
+    --fork-glass: rgb(36 36 44 / 0.94);
+    --fork-glass-strong: rgb(20 20 26 / 0.97);
+  }
+}
+
+/* ---- Narrow players (under 720 px) ---- */
+
+@container fork (max-width: 719px) {
+  .fork-container[data-fork-theme='glass'] .fork-frame > * {
+    --fork-bar-height: 68px;
+    --fork-control: 44px; /* tap targets stay 44 px */
+    --fork-icon: 18px;
+    --fork-time-size: 14px;
+    --fork-line-height: 4px;
+    --fork-station: 14px;
+    --fork-marker-w: 12px;
+    --fork-marker-h: 12px;
+  }
+
+  .fork-container[data-fork-theme='glass'] {
+    & .fork-bar {
+      padding: 0 10px 8px;
+    }
+
+    & .fork-bar > media-tooltip-group {
+      grid-template-areas: 'play time line more';
+      grid-template-columns: auto auto 1fr auto;
+      column-gap: 8px;
+    }
+
+    & .fork-bar-line {
+      height: 44px; /* the touch height; the track itself is 4 px */
+    }
+
+    & .fork-bar-play,
+    & .fork-bar-play:hover {
+      width: 44px;
+      height: 44px;
+      background: var(--fork-glass);
+    }
+
+    & .fork-bar-play .fork-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    & .fork-bar-time {
+      margin-right: 2px;
+    }
+
+    & .fork-line {
+      gap: 3px;
+    }
+
+    & .fork-line-segment {
+      min-width: 6px;
+    }
+
+    & .fork-line-station {
+      border-width: 2px;
+    }
+
+    & .fork-line-marker {
+      box-shadow:
+        0 0 0 4px rgb(217 45 54 / 0.35),
+        0 1px 4px rgb(0 0 0 / 0.45);
+    }
+
+    & .fork-line-marker[data-dragging] {
+      width: 16px;
+      height: 16px;
+    }
+
+    & .fork-line-plaque,
+    & .fork-line-marker .fork-line-plaque {
+      padding: 4px 8px;
+      font-size: 12px;
+      line-height: 16px;
+      border-radius: 8px;
+    }
+
+    /* Below the picture there is nothing to frost: the question sits on a solid panel. */
+    & fork-question {
+      padding: 12px;
+      background: #0d0d11;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      border-top: 0;
+    }
+
+    &:is(:fullscreen, [data-fork-pseudo-fullscreen]) fork-question {
+      background: var(--fork-dim-question);
+    }
+
+    & .fork-question-card {
+      gap: 14px;
+      padding: 16px;
+      background: #1a1a20;
+      border-radius: 16px;
+    }
+
+    &:is(:fullscreen, [data-fork-pseudo-fullscreen]) .fork-question-card {
+      background: var(--fork-glass-strong);
+    }
+
+    & .fork-question-kicker {
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+
+    & .fork-question-prompt {
+      font-size: 17px;
+      line-height: 22px;
+    }
+
+    & .fork-question-options {
+      gap: 6px;
+    }
+
+    & .fork-question-row {
+      height: 52px;
+      border-radius: 12px;
+    }
+
+    & .fork-question-number {
+      width: 28px;
+      height: 28px;
+      margin-left: 10px;
+      font-size: 13px;
+    }
+
+    & .fork-question-option,
+    & .fork-question-option:hover:not([aria-disabled='true']),
+    & .fork-question-option[data-verdict] {
+      padding: 0 12px 0 10px;
+      font-size: 16px;
+      line-height: 20px;
+    }
+
+    /* Too little height above a phone's bar: the card covers the whole picture. */
+    & fork-route-card[data-mode='card'] {
+      inset: 0;
+      z-index: 7;
+      padding: 16px 12px;
+    }
+
+    & .fork-card {
+      border-radius: 16px;
+    }
+
+    & .fork-card-body {
+      gap: 4px;
+      padding: 16px 16px 12px;
+    }
+
+    & .fork-card-title {
+      font-size: 24px;
+    }
+
+    & .fork-card-text {
+      font-size: 14px;
+      line-height: 19px;
+    }
+
+    & .fork-card-block {
+      width: calc(100% - 16px);
+      height: 52px;
+      margin: 0 8px 8px;
+      padding: 0 14px;
+      gap: 12px;
+      border-radius: 12px;
+    }
+
+    & .fork-card-block-title {
+      font-size: 15px;
+      line-height: 19px;
+    }
+
+    & .fork-card-block-time {
+      font-size: 13px;
+    }
+
+    & .fork-toast {
+      top: 10px;
+      left: 10px;
+      height: 44px;
+      border-radius: 12px;
+    }
+
+    & .fork-toast-number {
+      width: 44px;
+      font-size: 17px;
+    }
+
+    & .fork-toast-title {
+      font-size: 14px;
+      line-height: 18px;
+    }
+
+    & fork-detour-badge {
+      top: 8px;
+      left: 8px;
+      height: 28px;
+    }
+
+    & .fork-badge-pill,
+    & .fork-badge-button {
+      padding: 0 10px;
+      font-size: 11px;
+    }
+
+    & .fork-paused-button {
+      width: 56px;
+      height: 56px;
+    }
+
+    & .fork-paused-button .fork-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    & fork-start {
+      gap: 12px;
+      padding: 8px 16px var(--fork-bar-height);
+      background: rgb(0 0 0 / 0.7);
+    }
+
+    /* Length and checkpoints are in the bar's time and stations; the phone keeps the button. */
+    & .fork-start-meta {
+      display: none;
+    }
+
+    & .fork-start-head {
+      gap: 4px;
+    }
+
+    & .fork-start-title {
+      font-size: 28px;
+      line-height: 32px;
+    }
+
+    & .fork-start-button {
+      gap: 8px;
+      height: 44px;
+      padding: 0 20px 0 16px;
+      font-size: 16px;
+    }
+
+    & .fork-start-play {
+      width: 16px;
+      height: 16px;
+    }
+
+    & .fork-complete-head {
+      top: 12%;
+      right: calc(40% + 12px);
+      left: 5%;
+    }
+
+    & .fork-complete-title {
+      font-size: 24px;
+      line-height: 28px;
+    }
+
+    & .fork-complete-block {
+      top: 10px;
+      right: 10px;
+      justify-content: center;
+      width: 40%;
+      height: calc(100% - 20px);
+      padding: 16px;
+      border-radius: 16px;
+    }
+
+    & .fork-complete-score-label {
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    & .fork-complete-score {
+      font-size: 52px;
+    }
+
+    & .fork-complete-actions {
+      top: auto;
+      right: auto;
+      bottom: 10px;
+      left: 10px;
+      gap: 6px;
+      width: calc(60% - 30px);
+    }
+
+    & .fork-action {
+      gap: 6px;
+      height: 40px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    & .fork-action {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    & .fork-action .fork-icon {
+      display: none;
+    }
+
+    /* A phone's picture is short: the menu opens beside the ⋯ button, over the bar,
+       so all its 44 px rows fit. */
+    & .fork-menu {
+      right: 58px;
+      bottom: 4px;
+    }
+
+    & .fork-menu-item {
+      font-size: 14px;
+    }
+
+    /* The parts sheet covers the bar (there's no room above it on a phone). */
+    & fork-parts {
+      inset: 0;
+      z-index: 7;
+    }
+
+    & .fork-parts-list {
+      gap: 4px;
+      max-height: none;
+      padding: 8px;
+      border-radius: 16px 16px 0 0;
+    }
+
+    & .fork-parts-row,
+    & .fork-parts-row[data-status='watched'],
+    & .fork-parts-row[data-kind='detour'],
+    & .fork-parts-row[data-status='current'] {
+      height: 44px;
+    }
+  }
+}

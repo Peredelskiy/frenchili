@@ -12,6 +12,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M15.2%2010.4c3.4-1.9%209.3-1.2%209.3%204.4%200%207.1-7.4%2013.3-18.1%2014.6%205-3.6%207.6-8.4%207.6-14.2%200-2.4.3-3.9%201.2-4.8z%22%20fill%3D%22%23C8202B%22/%3E%3Cpath%20d%3D%22M14.4%2011.6c.6-2.2%202.6-3.4%205.2-3.2M19.6%208.4c0-2.2.8-4%202.6-5.2%22%20fill%3D%22none%22%20stroke%3D%22%230B1730%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22square%22/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="/src/fork/fork.css" />
+    <link rel="stylesheet" href="/src/fork/theme-glass.css" />
     <link rel="stylesheet" href="/src/demo/demo.css" />
   </head>
   <body>
@@ -24,6 +25,10 @@
           <button type="button" data-width="360">360</button>
           <button type="button" data-width="720">720</button>
           <button type="button" data-width="1200" aria-pressed="true">Full</button>
+        </span>
+        <span class="demo-tools-group" role="group" aria-label="Player theme">
+          <button type="button" data-theme="" aria-pressed="true">Affiche</button>
+          <button type="button" data-theme="glass" aria-pressed="false">Glass</button>
         </span>
         <label><input type="checkbox" id="reduced-motion" /> Reduced motion</label>
         <button type="button" id="reset">Reset</button>

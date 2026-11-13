@@ -33,7 +33,9 @@ function fitStage(container: HTMLElement): void {
   const px = (v: string) => parseFloat(v) || 0;
   const bar = container.querySelector<HTMLElement>('.fork-bar');
   const width = container.clientWidth - px(cs.paddingLeft) - px(cs.paddingRight);
-  const height = container.clientHeight - px(cs.paddingTop) - px(cs.paddingBottom) - (bar?.offsetHeight ?? 0);
+  // A bar laid over the picture (the glass theme) takes no height of its own.
+  const barHeight = bar && getComputedStyle(bar).position !== 'absolute' ? bar.offsetHeight : 0;
+  const height = container.clientHeight - px(cs.paddingTop) - px(cs.paddingBottom) - barHeight;
   const stage = Math.max(0, Math.floor(Math.min(width, (height * 16) / 9)));
   container.style.setProperty('--fork-fs-stage-width', `${stage}px`);
   container.style.setProperty('--fork-fs-stage-height', `${Math.round((stage * 9) / 16)}px`);

@@ -39,7 +39,7 @@ async function open(width, mobile = false) {
   );
   const page = await ctx.newPage();
   page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
-  await page.goto('http://127.0.0.1:5176/');
+  await page.goto(`http://127.0.0.1:5176/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`);
   await page.waitForFunction(() => document.querySelector('.fork-container')?.getAttribute('data-fork-phase') === 'idle');
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => document.getElementById('stage').scrollIntoView({ block: 'start' }));
@@ -175,7 +175,7 @@ const t = (page, x) => page.evaluate((x) => (document.querySelector('video').cur
   console.log('\n== Reduced motion (prefers-reduced-motion)');
   const ctx = await browser.newContext({ viewport: { width: 1260, height: 1000 }, reducedMotion: 'reduce' });
   const page = await ctx.newPage();
-  await page.goto('http://127.0.0.1:5176/');
+  await page.goto(`http://127.0.0.1:5176/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`);
   await page.waitForFunction(() => document.querySelector('.fork-container')?.getAttribute('data-fork-phase') === 'idle');
   const d = await page.evaluate(() => getComputedStyle(document.querySelector('.fork-bar')).getPropertyValue('--fork-duration-reflow').trim());
   check('reduced motion: transitions collapse', parseFloat(d) === 0.01, d);

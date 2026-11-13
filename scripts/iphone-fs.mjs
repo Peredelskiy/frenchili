@@ -21,7 +21,7 @@ for (const [label, vw, vh] of [['portrait', 390, 844], ['landscape', 844, 390]])
   page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
   const phase = (p) => page.waitForFunction((p) => document.querySelector('.fork-container')?.getAttribute('data-fork-phase') === p, p, { timeout: 30000 });
   const fs = () => page.evaluate(() => document.querySelector('.fork-container').hasAttribute('data-fork-pseudo-fullscreen'));
-  await page.goto('http://127.0.0.1:5177/'); await phase('idle'); await page.evaluate(() => document.fonts.ready);
+  await page.goto(`http://127.0.0.1:5177/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`); await phase('idle'); await page.evaluate(() => document.fonts.ready);
   check('fallback detected', await page.evaluate(() => document.querySelector('.fork-container').hasAttribute('data-fork-fs-fallback')));
   await page.tap('.fork-start-button'); await phase('playing');
   const viaMenu = await page.evaluate(() => getComputedStyle(document.querySelector('.fork-bar-more')).display !== 'none');
@@ -56,7 +56,9 @@ for (const [label, vw, vh] of [['portrait', 390, 844], ['landscape', 844, 390]])
   await page.evaluate((x) => (document.querySelector('video').currentTime = x), sc.p3.out - 0.5); await phase('complete'); await page.waitForTimeout(400);
   const cb = await page.evaluate(() => { const c = document.querySelector('fork-complete').getBoundingClientRect(); const s = document.querySelector('.fork-stage').getBoundingClientRect(); const b = document.querySelector('.fork-bar').getBoundingClientRect(); return { c: [Math.round(c.width), Math.round(c.height)], top: Math.round(c.top), stageTop: Math.round(s.top), barBottom: Math.round(b.bottom), barH: Math.round(b.height) }; });
   check('summary covers picture + bar only', Math.abs(cb.top - cb.stageTop) <= 2 && Math.abs(cb.top + cb.c[1] - cb.barBottom) <= 2, JSON.stringify(cb));
-  check('bar is the compact one (≤ 48 px)', cb.barH <= 48, `${cb.barH}px`);
+  // Glass lays its bar over the picture; its height includes the shade above the 44 px controls.
+  const compact = process.env.THEME === 'glass' ? 72 : 48;
+  check(`bar is the compact one (≤ ${compact} px)`, cb.barH <= compact, `${cb.barH}px`);
   await page.screenshot({ path: `/tmp/fs-${label}-complete.png` });
   await ctx.close();
 }

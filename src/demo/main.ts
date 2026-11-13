@@ -5,6 +5,11 @@ import '@fontsource/dm-sans/latin-500.css';
 import '@fontsource/dm-sans/latin-500-italic.css';
 import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/dm-sans/latin-700.css';
+// The Glass theme is set in Inter.
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/inter/latin-700.css';
 import '@videojs/html/media/mux-video';
 import '../fork';
 import { COURSE_LESSONS, lessonFromUrl, renderLesson } from './lessons';
@@ -60,6 +65,32 @@ for (const button of document.querySelectorAll<HTMLButtonElement>('[data-width]'
     }
   });
 }
+
+// Theme: Affiche (default) or Glass. ?theme=glass in the address opens the lesson in Glass.
+const themeButtons = document.querySelectorAll<HTMLButtonElement>('[data-theme]');
+const setTheme = (theme: string, updateUrl: boolean) => {
+  if (theme) skin.setAttribute('theme', theme);
+  else skin.removeAttribute('theme');
+  for (const button of themeButtons) button.setAttribute('aria-pressed', String(button.dataset.theme === theme));
+  if (updateUrl) {
+    const url = new URL(location.href);
+    if (theme) url.searchParams.set('theme', theme);
+    else url.searchParams.delete('theme');
+    history.replaceState(null, '', url);
+  }
+};
+for (const button of themeButtons) button.addEventListener('click', () => setTheme(button.dataset.theme ?? '', true));
+setTheme(new URLSearchParams(location.search).get('theme') === 'glass' ? 'glass' : '', false);
+
+// Moving to another lesson keeps the chosen theme.
+document.addEventListener('click', (event) => {
+  const link = (event.target as Element).closest<HTMLAnchorElement>('a[href*="lesson="]');
+  const theme = skin.getAttribute('theme');
+  if (!link || !theme) return;
+  const url = new URL(link.href, location.href);
+  url.searchParams.set('theme', theme);
+  link.href = url.toString();
+}, true);
 
 document.getElementById('reduced-motion')!.addEventListener('change', (event) => {
   skin.toggleAttribute('reduced-motion', (event.target as HTMLInputElement).checked);

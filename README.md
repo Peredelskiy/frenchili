@@ -43,6 +43,17 @@ Load the stylesheet and one script, then wrap your video:
 - Add `viewport-fit=cover` to the page’s viewport meta so fullscreen on iPhone fills the screen.
 - A runnable example without any build step: [`examples/embed.html`](examples/embed.html).
 
+### Themes
+
+The behaviour is one skin; the look is a theme. Both themes share the same elements, keyboard, focus rules and accessibility checks.
+
+| Affiche (default) | Glass: `<fork-skin theme="glass">` |
+| --- | --- |
+| The Frenchili poster look: the bar under the picture, condensed type, ink, cream and red. | A neutral look for any platform: the bar over the picture on a soft shade, round glass buttons, a segmented track, frosted cards, Inter. |
+| ![Affiche checkpoint](docs/screens/checkpoint.png) | ![Glass checkpoint](docs/screens/glass-checkpoint.png) |
+
+Try both on the [live demo](https://frenchili.collabas.com/?theme=glass) with the Affiche / Glass switch. Glass is set in Inter (load it, or it falls back to the system font) and falls back to solid panels where blur isn't available or the viewer asks for less transparency. To make either theme your own, override the `--fork-*` custom properties (colours, fonts, sizes) on `.fork-container`; Glass adds `--fork-glass`, `--fork-glass-strong`, `--fork-glass-line` and `--fork-radius`.
+
 ### `<fork-skin>` attributes
 
 | Attribute | Effect |
@@ -52,6 +63,7 @@ Load the stylesheet and one script, then wrap your video:
 | `autostart` | Skip the start screen; the lesson begins on the first play. |
 | `auto-continue` | Milliseconds after which the route card continues by itself (by default it waits for the viewer). |
 | `reduced-motion` | Force reduced motion (the system setting is honoured regardless). |
+| `theme` | `glass` for the neutral Glass look; leave it out for Affiche. |
 
 ### Events
 

@@ -19,13 +19,13 @@ const server = spawn('npx', ['vite', '--port', '5173', '--host', '127.0.0.1', '-
 await new Promise((resolve) => server.stdout.on('data', (chunk) => String(chunk).includes('5173') && resolve()));
 
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
-const page = await browser.newPage({ viewport: { width: Math.max(width + 48, 480), height: 1000 } });
+const page = await browser.newPage({ viewport: { width: Math.max(width + 48, 480), height: 1000 }, deviceScaleFactor: Number(process.env.DPR ?? 1) });
 page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
 page.on('console', (m) => {
   if (m.type() === 'error') console.log('CONSOLE', m.text());
 });
 
-await page.goto('http://127.0.0.1:5173/');
+await page.goto(`http://127.0.0.1:5173/${process.env.THEME ? `?theme=${process.env.THEME}` : ''}`);
 await page.evaluate((w) => document.querySelector(`[data-width="${w}"]`).click(), width);
 await page.evaluate(() => {
   const video = document.querySelector('video');
@@ -43,7 +43,7 @@ const waitPhase = async (p, timeout = 90000) => {
 const shot = async (name) => {
   await page.evaluate(() => document.getElementById('stage').scrollIntoView({ block: 'start' }));
   const box = await page.locator('.fork-container').boundingBox();
-  await page.screenshot({ path: `${shots}${width}-${name}.png`, clip: { x: box.x, y: box.y, width: box.width, height: box.height } });
+  await page.screenshot({ path: `${shots}${process.env.THEME ? `${process.env.THEME}-` : ''}${width}-${name}.png`, clip: { x: box.x, y: box.y, width: box.width, height: box.height } });
 };
 const setTime = (t) => page.evaluate((t) => (document.querySelector('video').currentTime = t), t);
 const time = () => page.evaluate(() => document.querySelector('video').currentTime);
@@ -103,7 +103,14 @@ await page.waitForTimeout(150);
 await shot('6-merge');
 await waitPhase('playing');
 
-// Lesson parts panel.
+// Lesson parts panel. (A bar that hides while playing comes back on mouse movement.)
+const wake = async () => {
+  const box = await page.locator('.fork-stage').boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.move(box.x + box.width / 2 + 10, box.y + box.height / 2 + 10);
+  await page.waitForTimeout(150);
+};
+await wake();
 if (width >= 720) {
   await page.click('fork-parts-button');
   await page.waitForTimeout(300);
