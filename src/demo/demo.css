@@ -270,6 +270,14 @@ main {
   box-shadow: 10px 10px 0 var(--ink);
 }
 
+/* Glass is the neutral theme: no poster frame, soft corners and a soft shadow. */
+.player:has(fork-skin[theme='glass']) video-player {
+  overflow: hidden;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgb(11 23 48 / 0.28);
+}
+
 .demo-note {
   margin: 0 0 var(--s4);
   padding: var(--s3) var(--s4);
@@ -546,6 +554,10 @@ main {
   }
   .player video-player {
     box-shadow: 6px 6px 0 var(--ink);
+  }
+  .player:has(fork-skin[theme='glass']) video-player {
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgb(11 23 48 / 0.28);
   }
   .columns {
     grid-template-columns: minmax(0, 1fr);
