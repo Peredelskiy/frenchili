@@ -79,7 +79,11 @@ const setTheme = (theme: string, updateUrl: boolean) => {
     const url = new URL(location.href);
     if (theme) url.searchParams.set('theme', theme);
     else url.searchParams.delete('theme');
-    history.replaceState(null, '', url);
+    try {
+      history.replaceState(null, '', url);
+    } catch {
+      // Some hosts (a sandboxed preview) don't allow it; the switch still works.
+    }
   }
 };
 for (const button of themeButtons) button.addEventListener('click', () => setTheme(button.dataset.theme ?? '', true));
