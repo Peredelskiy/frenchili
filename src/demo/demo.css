@@ -190,6 +190,7 @@ main:focus {
   line-height: 1;
   letter-spacing: 0.04em;
   text-decoration: none;
+  text-transform: uppercase;
 }
 .wordmark-mark {
   flex: none;
@@ -584,7 +585,7 @@ main {
   .topnav-progress-bar {
     width: 56px;
   }
-  .demo-tools-group {
+  .demo-tools-widths {
     display: none; /* width presets mean nothing on a phone */
   }
   .demo-tools-label {

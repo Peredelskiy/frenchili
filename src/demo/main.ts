@@ -71,6 +71,9 @@ const themeButtons = document.querySelectorAll<HTMLButtonElement>('[data-theme]'
 const setTheme = (theme: string, updateUrl: boolean) => {
   if (theme) skin.setAttribute('theme', theme);
   else skin.removeAttribute('theme');
+  // The page follows: Glass turns Frenchili into a plain corporate product page.
+  if (theme) document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
   for (const button of themeButtons) button.setAttribute('aria-pressed', String(button.dataset.theme === theme));
   if (updateUrl) {
     const url = new URL(location.href);
